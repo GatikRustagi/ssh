@@ -22,6 +22,7 @@ class NetworkGraphPanel extends ConsumerWidget {
       title: 'Influence Network',
       icon: Icons.hub_outlined,
       panelKey: 'network',
+      expandedHeight: 440,
       child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(

@@ -171,36 +171,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget _buildWideLayout() {
     return SingleChildScrollView(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 380,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: SentimentChartPanel()),
-                const SizedBox(width: 16),
-                SizedBox(width: 360, child: TrendsPanel()),
-              ],
-            ),
+          const _UserGreetingBanner(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: SentimentChartPanel()),
+              const SizedBox(width: 16),
+              SizedBox(width: 360, child: TrendsPanel()),
+            ],
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 440,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: NetworkGraphPanel()),
-                const SizedBox(width: 16),
-                SizedBox(width: 360, child: DemographicsPanel()),
-              ],
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: NetworkGraphPanel()),
+              const SizedBox(width: 16),
+              SizedBox(width: 360, child: DemographicsPanel()),
+            ],
           ),
           const SizedBox(height: 16),
           // Full-width Coordination Risk Alerts panel
-          SizedBox(
+          Container(
             key: _alertsKey,
-            height: 280,
-            child: CoordinationAlertPanel(),
+            child: const CoordinationAlertPanel(),
           ),
         ],
       ),
@@ -210,17 +205,116 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget _buildNarrowLayout() {
     return ListView(
       children: [
-        SizedBox(height: 340, child: SentimentChartPanel()),
+        const _UserGreetingBanner(),
+        const SentimentChartPanel(),
         const SizedBox(height: 16),
-        SizedBox(height: 340, child: TrendsPanel()),
+        const TrendsPanel(),
         const SizedBox(height: 16),
-        SizedBox(height: 440, child: NetworkGraphPanel()),
+        const NetworkGraphPanel(),
         const SizedBox(height: 16),
-        SizedBox(height: 400, child: DemographicsPanel()),
+        const DemographicsPanel(),
         const SizedBox(height: 16),
         // Coordination Risk Alerts — full-width at bottom
-        SizedBox(key: _alertsKey, height: 320, child: CoordinationAlertPanel()),
+        Container(key: _alertsKey, child: const CoordinationAlertPanel()),
       ],
+    );
+  }
+}
+
+// ── Glowing User Greeting Banner ──────────────────────────────────────────────
+
+class _UserGreetingBanner extends StatelessWidget {
+  const _UserGreetingBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = SupabaseService.instance.currentUser;
+    String name = 'Analyst';
+    if (user != null && user.email != null && user.email!.isNotEmpty) {
+      final parts = user.email!.split('@');
+      if (parts.isNotEmpty && parts.first.isNotEmpty) {
+        name = parts.first[0].toUpperCase() + parts.first.substring(1);
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.accentGlow.withValues(alpha: 0.25),
+            AppTheme.surfaceHigh,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.accent.withValues(alpha: 0.35),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.accentGlow.withValues(alpha: 0.15),
+            blurRadius: 24,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppTheme.accent, Color(0xFF7C3AED)],
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.accentGlow,
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: const Icon(Icons.waving_hand_rounded, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hi, $name 👋',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: AppTheme.accent.withValues(alpha: 0.8),
+                        blurRadius: 16,
+                      ),
+                      Shadow(
+                        color: AppTheme.accentLight.withValues(alpha: 0.6),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Welcome back to AudiencePulse. Here is your live intelligence overview.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -21,6 +21,7 @@ class DemographicsPanel extends ConsumerWidget {
       title: 'Audience Demographics',
       icon: Icons.people_outline_rounded,
       panelKey: 'demographics',
+      expandedHeight: 440,
       child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(

@@ -24,6 +24,7 @@ class SentimentChartPanel extends ConsumerWidget {
       title: 'Sentiment Timeline',
       icon: Icons.show_chart_rounded,
       panelKey: 'sentiment',
+      expandedHeight: 380,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

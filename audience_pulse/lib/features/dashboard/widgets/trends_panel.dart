@@ -19,6 +19,7 @@ class TrendsPanel extends ConsumerWidget {
       title: 'Top Trends',
       icon: Icons.trending_up_rounded,
       panelKey: 'trends',
+      expandedHeight: 380,
       child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e',

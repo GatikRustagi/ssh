@@ -6,13 +6,17 @@ import '../../../core/utils/app_utils.dart';
 import '../providers/dashboard_providers.dart';
 
 /// Shared card wrapper for all dashboard panels.
-/// Provides consistent header with icon, title, last-updated time, and refresh.
-class PanelCard extends ConsumerWidget {
+/// Provides consistent header with icon, title, last-updated time, refresh,
+/// and collapsible expansion toggle.
+class PanelCard extends ConsumerStatefulWidget {
   final String title;
   final IconData icon;
   final String panelKey;
   final Widget child;
   final VoidCallback? onRefresh;
+  final double? expandedHeight;
+  final bool collapsible;
+  final bool defaultCollapsed;
 
   const PanelCard({
     super.key,
@@ -21,57 +25,103 @@ class PanelCard extends ConsumerWidget {
     required this.panelKey,
     required this.child,
     this.onRefresh,
+    this.expandedHeight,
+    this.collapsible = true,
+    this.defaultCollapsed = false,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lastUpdated = ref.watch(lastUpdatedProvider)[panelKey];
+  ConsumerState<PanelCard> createState() => _PanelCardState();
+}
 
-    return Container(
+class _PanelCardState extends ConsumerState<PanelCard> {
+  late bool _isCollapsed;
+
+  @override
+  void initState() {
+    super.initState();
+    _isCollapsed = widget.defaultCollapsed;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lastUpdated = ref.watch(lastUpdatedProvider)[widget.panelKey];
+    final double? height = widget.expandedHeight != null
+        ? (_isCollapsed ? 52.0 : widget.expandedHeight)
+        : null;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      height: height,
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Panel Header ───────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
             child: Row(
               children: [
-                Icon(icon, size: 16, color: AppTheme.accent),
+                Icon(widget.icon, size: 16, color: AppTheme.accent),
                 const SizedBox(width: 8),
-                Text(title, style: Theme.of(context).textTheme.headlineSmall),
+                Text(widget.title, style: Theme.of(context).textTheme.headlineSmall),
                 const Spacer(),
-                if (lastUpdated != null)
+                if (lastUpdated != null && !_isCollapsed)
                   Text(
                     'Updated ${AppUtils.timeAgo(lastUpdated)}',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 const SizedBox(width: 4),
                 // Refresh button
-                InkWell(
-                  onTap: onRefresh,
-                  borderRadius: BorderRadius.circular(6),
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
-                    child: Icon(Icons.refresh_rounded, size: 14, color: AppTheme.textMuted),
+                if (widget.onRefresh != null && !_isCollapsed) ...[
+                  InkWell(
+                    onTap: widget.onRefresh,
+                    borderRadius: BorderRadius.circular(6),
+                    child: const Padding(
+                      padding: EdgeInsets.all(4),
+                      child: Icon(Icons.refresh_rounded, size: 14, color: AppTheme.textMuted),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 4),
+                ],
+                // Collapsible toggle button
+                if (widget.collapsible)
+                  InkWell(
+                    key: Key('collapse_btn_${widget.panelKey}'),
+                    onTap: () => setState(() => _isCollapsed = !_isCollapsed),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: AnimatedRotation(
+                        turns: _isCollapsed ? 0.5 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        child: const Icon(
+                          Icons.keyboard_arrow_up_rounded,
+                          size: 18,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          const SizedBox(height: 4),
-          Divider(color: AppTheme.border, height: 1),
-          // ── Panel Content ──────────────────────────────────────────────
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: child,
+          if (!_isCollapsed) ...[
+            Divider(color: AppTheme.border, height: 1),
+            // ── Panel Content ──────────────────────────────────────────────
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: widget.child,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
