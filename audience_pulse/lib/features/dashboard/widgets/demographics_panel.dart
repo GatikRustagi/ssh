@@ -60,17 +60,17 @@ class _DemographicsView extends StatelessWidget {
         children: [
           // Age Bracket Pie/Bar
           _SectionHeader(title: 'Age Distribution'),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           SizedBox(
-            height: 140,
+            height: 160,
             child: _AgeBarChart(ageCounts: ageCounts),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // Languages
           _SectionHeader(title: 'Top Languages'),
           const SizedBox(height: 8),
-          ...sortedLangs.take(5).map((e) => _HorizontalBar(
+          ...sortedLangs.map((e) => _HorizontalBar(
             label: e.key,
             count: e.value,
             total: langCounts.values.fold(0, (a, b) => a + b),
@@ -81,7 +81,7 @@ class _DemographicsView extends StatelessWidget {
           // Regions
           _SectionHeader(title: 'Top Regions'),
           const SizedBox(height: 8),
-          ...sortedRegions.take(5).map((e) => _HorizontalBar(
+          ...sortedRegions.map((e) => _HorizontalBar(
             label: e.key,
             count: e.value,
             total: regionCounts.values.fold(0, (a, b) => a + b),
@@ -137,11 +137,20 @@ class _AgeBarChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              getTitlesWidget: (val, _) {
-                final label = brackets[val.toInt()];
-                return Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+              reservedSize: 28,
+              interval: 1,
+              getTitlesWidget: (val, meta) {
+                final index = val.toInt();
+                if (index < 0 || index >= brackets.length || val != index.toDouble()) {
+                  return const SizedBox.shrink();
+                }
+                return SideTitleWidget(
+                  meta: meta,
+                  space: 6,
+                  child: Text(
+                    brackets[index],
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+                  ),
                 );
               },
             ),
@@ -149,15 +158,19 @@ class _AgeBarChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 38,
-              getTitlesWidget: (val, _) => Text(
-                AppUtils.compactNumber(val.toInt()),
-                style: Theme.of(context).textTheme.bodySmall,
+              reservedSize: 46,
+              getTitlesWidget: (val, meta) => SideTitleWidget(
+                meta: meta,
+                space: 4,
+                child: Text(
+                  AppUtils.compactNumber(val.toInt()),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
+                ),
               ),
             ),
           ),
           rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles:   const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:   const AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 16)),
         ),
         barGroups: barGroups,
         barTouchData: BarTouchData(
@@ -192,30 +205,39 @@ class _HorizontalBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final pct = total == 0 ? 0.0 : count / total;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           SizedBox(
-            width: 64,
-            child: Text(label, style: Theme.of(context).textTheme.bodySmall,
-                overflow: TextOverflow.ellipsis),
+            width: 76,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: pct,
                 backgroundColor: AppTheme.border,
                 valueColor: AlwaysStoppedAnimation<Color>(color),
-                minHeight: 8,
+                minHeight: 10,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Text(
-            '${(pct * 100).toStringAsFixed(1)}%',
-            style: Theme.of(context).textTheme.bodySmall,
+            '${AppUtils.compactNumber(count)} (${(pct * 100).toStringAsFixed(0)}%)',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontSize: 11,
+              color: AppTheme.textSecondary,
+            ),
           ),
         ],
       ),
