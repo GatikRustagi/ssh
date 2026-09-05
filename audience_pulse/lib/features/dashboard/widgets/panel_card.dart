@@ -115,12 +115,18 @@ class _PanelCardState extends ConsumerState<PanelCard> {
           if (!_isCollapsed) ...[
             Divider(color: AppTheme.border, height: 1),
             // ── Panel Content ──────────────────────────────────────────────
-            Expanded(
-              child: Padding(
+            if (widget.expandedHeight != null)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: widget.child,
+                ),
+              )
+            else
+              Padding(
                 padding: const EdgeInsets.all(16),
                 child: widget.child,
               ),
-            ),
           ],
         ],
       ),
