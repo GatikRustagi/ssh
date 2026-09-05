@@ -1,0 +1,51 @@
+name: audience_pulse
+description: AI-Driven Social Media Audience Intelligence Platform for Smart India Hackathon.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # Supabase
+  supabase_flutter: ^2.9.0
+
+  # Charts
+  fl_chart: ^0.70.2
+
+  # Network graph
+  graphview: ^1.2.0
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # Utilities
+  intl: ^0.20.2
+  equatable: ^2.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code generation
+  build_runner: ^2.4.15
+  riverpod_generator: ^2.6.5
+  custom_lint: ^0.7.5
+  riverpod_lint: ^2.6.5
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
