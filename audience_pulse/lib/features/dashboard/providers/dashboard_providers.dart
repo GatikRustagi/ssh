@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../services/supabase_service.dart';
+import '../../../services/analysis_engine.dart';
 import '../../../models/sentiment_score.dart';
 import '../../../models/trend.dart';
 import '../../../models/network_graph.dart';
 import '../../../models/demographic_summary.dart';
+import '../../../models/analysis_models.dart';
 
 // ── Platform Filter State ─────────────────────────────────────────────────────
 /// Holds the currently selected platform ID filter (null = All).
@@ -30,6 +32,23 @@ final sentimentTimelineProvider = FutureProvider.autoDispose<List<SentimentScore
       end: DateTime.now(),
     ),
   );
+});
+
+// ── Sentiment Explainer ───────────────────────────────────────────────────────
+
+/// Derives the dominant sentiment label and evidence string from the latest
+/// sentiment scores using AnalysisEngine on the combined text of recent posts.
+///
+/// Used by [SentimentChartPanel] to display the "because: …" chip.
+final sentimentExplainerProvider = FutureProvider.autoDispose<SentimentResult?>((ref) async {
+  final platformId = ref.watch(platformFilterProvider);
+  final posts = await SupabaseService.instance.getRecentPostsForExplainer(
+    platformId: platformId,
+    limit: 20,
+  );
+  if (posts.isEmpty) return null;
+  final combined = posts.map((p) => p.contentText).join(' ');
+  return AnalysisEngine.instance.classifySentiment(combined);
 });
 
 // ── Trends ────────────────────────────────────────────────────────────────────
@@ -57,6 +76,30 @@ final demographicsProvider = FutureProvider.autoDispose<List<DemographicSummary>
 
 final ingestionStatusProvider = FutureProvider.autoDispose((ref) async {
   return SupabaseService.instance.getIngestionStatus();
+});
+
+// ── Coordination Risk Alerts ──────────────────────────────────────────────────
+
+/// Fetches recent posts, runs the deterministic AnalysisEngine coordination-
+/// risk rules on them, and returns a list of [CoordinationRiskResult] sorted
+/// by risk score (highest first).
+///
+/// Auto-refreshes every 60 seconds via a delayed self-invalidation.
+final coordinationAlertsProvider =
+    FutureProvider.autoDispose<List<CoordinationRiskResult>>((ref) async {
+  final platformId = ref.watch(platformFilterProvider);
+
+  // Schedule refresh after 60 s
+  ref.keepAlive();
+  Future.delayed(const Duration(seconds: 60), () {
+    ref.invalidateSelf();
+  });
+
+  final posts = await SupabaseService.instance.getRecentPostsForCoordination(
+    platformId: platformId,
+    limit: 200,
+  );
+  return AnalysisEngine.instance.computeCoordinationRisk(posts);
 });
 
 // ── Last Updated ──────────────────────────────────────────────────────────────

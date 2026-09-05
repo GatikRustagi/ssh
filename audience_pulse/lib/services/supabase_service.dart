@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/supabase/supabase_client.dart';
 import '../core/constants/app_constants.dart';
 import '../models/platform_model.dart';
+import '../models/post.dart';
 import '../models/sentiment_score.dart';
 import '../models/trend.dart';
 import '../models/network_graph.dart';
@@ -149,6 +150,47 @@ class SupabaseService {
         .order('aggregate_count', ascending: false);
 
     return (data as List).map((e) => DemographicSummary.fromJson(e)).toList();
+  }
+
+  // ── Recent Posts (for AnalysisEngine) ────────────────────────────────────
+
+  /// Returns the [limit] most recent posts for the sentiment explainer.
+  /// Used by [sentimentExplainerProvider].
+  Future<List<Post>> getRecentPostsForExplainer({
+    String? platformId,
+    int limit = 20,
+  }) async {
+    var query = _client.from(AppConstants.tablePosts).select();
+
+    if (platformId != null) {
+      query = query.eq('platform_id', platformId);
+    }
+
+    final data = await query
+        .order('posted_at', ascending: false)
+        .limit(limit);
+
+    return (data as List).map((e) => Post.fromJson(e)).toList();
+  }
+
+  /// Returns the [limit] most recent posts for the coordination-risk engine.
+  /// Wider window (default 200) so the engine can detect bursts across clusters.
+  /// Used by [coordinationAlertsProvider].
+  Future<List<Post>> getRecentPostsForCoordination({
+    String? platformId,
+    int limit = 200,
+  }) async {
+    var query = _client.from(AppConstants.tablePosts).select();
+
+    if (platformId != null) {
+      query = query.eq('platform_id', platformId);
+    }
+
+    final data = await query
+        .order('posted_at', ascending: false)
+        .limit(limit);
+
+    return (data as List).map((e) => Post.fromJson(e)).toList();
   }
 
   // ── Auth Helpers ──────────────────────────────────────────────────────────
