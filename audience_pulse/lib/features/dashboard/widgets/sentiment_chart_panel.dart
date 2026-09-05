@@ -142,7 +142,7 @@ class _SentimentChartState extends State<_SentimentChart> {
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: 22,
+                    reservedSize: 32,
                     interval: 6,
                     getTitlesWidget: (val, _) {
                       final idx = val.toInt();

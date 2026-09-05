@@ -108,7 +108,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Text(
                           _isSignUp
                               ? 'Start analyzing social intelligence'
-                              : 'Welcome back to AudiencePulse',
+                              : 'Welcome back to Audie',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 24),
@@ -264,7 +264,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          'AudiencePulse',
+          'Audie',
           style: Theme.of(context).textTheme.displaySmall?.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -0.5,
