@@ -164,8 +164,53 @@ def scan_for_bots():
                 console.print("[dim cyan]ℹ️ This hashtag swarm was already logged.[/dim cyan]\n")
     # =========================================================================
 
+    # =========================================================================
+    # NEW SUPERPOWER: Idea 4 - The Clean-Up Crew (Hate Speech / Spam Filter)
+    # =========================================================================
+    bad_words = ["free money", "scam", "click here", "stupid", "idiot", "hate"]
+    
+    for post in posts:
+        msg = post.get("content_text", "").lower()
+        author = post.get("author_id")
+        post_id = post.get("id")
+        
+        found_bad_words = [word for word in bad_words if word in msg]
+        
+        if found_bad_words:
+            bot_detected = True
+            bad_word_list = ", ".join(found_bad_words)
+            
+            spam_message = f"[bold yellow]👉 Toxic Word(s):[/bold yellow] [white]{bad_word_list}[/white]\n"
+            spam_message += f"[bold yellow]👉 Author:[/bold yellow] [bold red]{author}[/bold red]\n"
+            spam_message += f"[bold yellow]👉 Message:[/bold yellow] [dim]{msg[:60]}...[/dim]"
+            
+            console.print(Panel(spam_message, title="🚨 ALERT! Toxic/Spam Content Detected! 🚨", border_style="dark_orange", expand=False))
+
+            narrative_label = f"Toxic/Spam Content: '{found_bad_words[0]}'"
+            alert_data = {
+                "narrative_label": narrative_label,
+                "risk_level": "medium",
+                "risk_score": 0.85,
+                "evidence": [
+                    f"Message contained toxic/spam keywords: {bad_word_list}",
+                    f"Sample text: {msg[:100]}"
+                ],
+                "post_ids": [post_id],
+                "window_start": window_start,
+                "window_end": window_end,
+                "resolved": False
+            }
+
+            existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
+            if not existing.data:
+                supabase.table("coordination_alerts").insert(alert_data).execute()
+                console.print("[bold green]✅ Toxic Content Alert logged to Supabase![/bold green]\n")
+            else:
+                console.print("[dim cyan]ℹ️ This toxic content was already logged.[/dim cyan]\n")
+    # =========================================================================
+
     if not bot_detected:
-        console.print("[bold green]✅ Playground is safe! No copycat bots or hashtag swarms detected.[/bold green]")
+        console.print("[bold green]✅ Playground is safe! No attacks, swarms, or toxic words detected.[/bold green]")
 
 if __name__ == "__main__":
     console.print(Panel("[bold cyan]👮‍♂️ Bot Police is on duty! Press Ctrl+C to stop.[/bold cyan]", expand=False))

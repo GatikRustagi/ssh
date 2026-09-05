@@ -48,4 +48,14 @@ for i in range(4):
         "raw_engagement_count": 0
     }).execute()
 
+# 4. Inject Toxic Content (Idea 4)
+print("🤬 Injecting a toxic spam post (Clean-Up Crew test)...")
+supabase.table("posts").insert({
+    "platform_id": authors[0]["platform_id"],
+    "author_id": authors[0]["id"],
+    "content_text": "You are a stupid idiot if you don't click here for free money!",
+    "posted_at": "2026-09-06T00:02:00Z",
+    "raw_engagement_count": 0
+}).execute()
+
 print("✅ Bot posts injected! Now run bot_police.py to see it catch them!")
