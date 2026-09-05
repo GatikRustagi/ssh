@@ -45,24 +45,32 @@ class _NetworkGraphViewState extends State<_NetworkGraphView> {
   late final Graph _gvGraph;
   late final Algorithm _algorithm;
   m.NetworkNode? _selectedNode;
+  final TransformationController _viewController = TransformationController();
 
   @override
   void initState() {
     super.initState();
     _buildGraph();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // The canvas is 4000x4000. Scaled by 0.8, it's 3200x3200. 
+      // Center is at 1600, 1600.
+      // Offset by roughly half the viewport size (400, 200) to perfectly frame the center.
+      _viewController.value = Matrix4.identity()
+        ..translate(-1200.0, -1400.0)
+        ..scale(0.8);
+    });
   }
 
   void _buildGraph() {
     _gvGraph = Graph()..isTree = false;
 
-    // FruchtermanReingoldAlgorithm requires a FruchtermanReingoldConfiguration
     _algorithm = FruchtermanReingoldAlgorithm(
       FruchtermanReingoldConfiguration(
-        iterations: 300,
-        repulsionRate: 0.2,
-        attractionRate: 0.15,
-        repulsionPercentage: 0.4,
-        attractionPercentage: 0.15,
+        iterations: 250, 
+        repulsionRate: 0.1,
+        attractionRate: 0.8,
+        repulsionPercentage: 0.1,
+        attractionPercentage: 0.5,
         shuffleNodes: true,
       ),
     );
@@ -109,26 +117,33 @@ class _NetworkGraphViewState extends State<_NetworkGraphView> {
         // Graph viewport
         Expanded(
           child: InteractiveViewer(
+            transformationController: _viewController,
             constrained: false,
             boundaryMargin: const EdgeInsets.all(double.infinity),
             minScale: 0.1,
             maxScale: 5.0,
-            child: GraphView(
+            child: SizedBox(
+              width: 4000,
+              height: 4000,
+              child: Center(
+                child: GraphView(
               graph: _gvGraph,
               algorithm: _algorithm,
               paint: Paint()
                 ..color = AppTheme.border
                 ..strokeWidth = 1.5
                 ..style = PaintingStyle.stroke,
-              builder: (Node node) {
-                final id = node.key!.value as String;
-                final networkNode = nodeMap[id];
-                if (networkNode == null) {
-                  return const SizedBox(width: 12, height: 12);
-                }
-                final isKol = kolIds.contains(id);
-                return _buildNodeWidget(context, networkNode, isKol);
-              },
+                  builder: (Node node) {
+                    final id = node.key!.value as String;
+                    final networkNode = nodeMap[id];
+                    if (networkNode == null) {
+                      return const SizedBox(width: 12, height: 12);
+                    }
+                    final isKol = kolIds.contains(id);
+                    return _buildNodeWidget(context, networkNode, isKol);
+                  },
+                ),
+              ),
             ),
           ),
         ),

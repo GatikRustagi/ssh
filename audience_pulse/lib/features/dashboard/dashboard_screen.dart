@@ -157,36 +157,40 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildWideLayout() {
-    return Column(
-      children: [
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: SentimentChartPanel()),
-              const SizedBox(width: 16),
-              SizedBox(width: 320, child: TrendsPanel()),
-            ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(
+            height: 340,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: SentimentChartPanel()),
+                const SizedBox(width: 16),
+                SizedBox(width: 320, child: TrendsPanel()),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: NetworkGraphPanel()),
-              const SizedBox(width: 16),
-              SizedBox(width: 320, child: DemographicsPanel()),
-            ],
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 380,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: NetworkGraphPanel()),
+                const SizedBox(width: 16),
+                SizedBox(width: 320, child: DemographicsPanel()),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        // Full-width Coordination Risk Alerts panel
-        SizedBox(
-          height: 280,
-          child: CoordinationAlertPanel(),
-        ),
-      ],
+          const SizedBox(height: 16),
+          // Full-width Coordination Risk Alerts panel
+          SizedBox(
+            height: 280,
+            child: CoordinationAlertPanel(),
+          ),
+        ],
+      ),
     );
   }
 
