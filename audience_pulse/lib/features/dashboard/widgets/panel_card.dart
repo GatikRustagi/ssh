@@ -60,7 +60,7 @@ class _PanelCardState extends ConsumerState<PanelCard> {
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: widget.expandedHeight != null ? MainAxisSize.max : MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Panel Header ───────────────────────────────────────────────

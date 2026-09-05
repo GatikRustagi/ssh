@@ -12,13 +12,7 @@ import 'widgets/network_graph_panel.dart';
 import 'widgets/demographics_panel.dart';
 import 'widgets/coordination_alert_panel.dart';
 
-/// Main dashboard — 4-panel responsive analytics view.
-///
-/// Layout:
-///   [Sentiment Timeline] | [Top Trends]
-///   [Network Graph]      | [Demographics]
-///
-/// All panels share a platform filter dropdown.
+/// Main dashboard — 4-panel responsive analytics view with left platform nav.
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
@@ -27,11 +21,16 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  // Platforms for dropdown — keyed by display name
   static const Map<String, String?> _platformOptions = {
     'All Platforms': null,
     'X (Twitter)': '11111111-0000-0000-0000-000000000001',
-    'Telegram':    '11111111-0000-0000-0000-000000000002',
+    'Telegram': '11111111-0000-0000-0000-000000000002',
+  };
+
+  static const Map<String, IconData> _platformIcons = {
+    'All Platforms': Icons.language_rounded,
+    'X (Twitter)': Icons.close_rounded, // 𝕏 shape via icon
+    'Telegram': Icons.send_rounded,
   };
 
   String _selectedPlatformLabel = 'All Platforms';
@@ -44,8 +43,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ctx,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
-      ).catchError((_) {}); // Ignore if no Scrollable is found
+      ).catchError((_) {});
     }
+  }
+
+  void _selectPlatform(String label) {
+    setState(() => _selectedPlatformLabel = label);
+    ref.read(platformFilterProvider.notifier).state = _platformOptions[label];
   }
 
   @override
@@ -53,19 +57,33 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: _buildAppBar(context),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Responsive: single column on narrow screens, 2-column grid on wide
-            final isWide = constraints.maxWidth >= 900;
-            if (isWide) {
-              return _buildWideLayout();
-            } else {
-              return _buildNarrowLayout();
-            }
-          },
-        ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Left platform navigation sidebar ──────────────────────────
+          _LeftPlatformNav(
+            platformOptions: _platformOptions,
+            platformIcons: _platformIcons,
+            selected: _selectedPlatformLabel,
+            onSelect: _selectPlatform,
+          ),
+          // Vertical divider
+          Container(width: 1, color: AppTheme.border),
+          // ── Main content ───────────────────────────────────────────────
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth >= 860;
+                  return isWide
+                      ? _buildWideLayout()
+                      : _buildNarrowLayout();
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -103,9 +121,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
       actions: [
-        // Platform filter dropdown
-        _buildPlatformFilter(),
-        const SizedBox(width: 12),
         // Ingestion status button
         TextButton.icon(
           key: const Key('ingestion_status_btn'),
@@ -137,37 +152,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildPlatformFilter() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceHigh,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: DropdownButton<String>(
-        key: const Key('platform_filter_dropdown'),
-        value: _selectedPlatformLabel,
-        underline: const SizedBox(),
-        dropdownColor: AppTheme.surfaceHigh,
-        style: Theme.of(context).textTheme.labelLarge,
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: AppTheme.textSecondary),
-        items: _platformOptions.keys.map((label) {
-          return DropdownMenuItem<String>(
-            value: label,
-            child: Text(label),
-          );
-        }).toList(),
-        onChanged: (label) {
-          if (label == null) return;
-          setState(() => _selectedPlatformLabel = label);
-          // Update the global platform filter provider
-          ref.read(platformFilterProvider.notifier).state = _platformOptions[label];
-        },
-      ),
-    );
-  }
-
   Widget _buildWideLayout() {
     return SingleChildScrollView(
       child: Column(
@@ -179,7 +163,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Expanded(child: SentimentChartPanel()),
               const SizedBox(width: 16),
-              SizedBox(width: 360, child: TrendsPanel()),
+              SizedBox(width: 340, child: TrendsPanel()),
             ],
           ),
           const SizedBox(height: 16),
@@ -188,11 +172,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Expanded(child: NetworkGraphPanel()),
               const SizedBox(width: 16),
-              SizedBox(width: 360, child: DemographicsPanel()),
+              SizedBox(width: 340, child: DemographicsPanel()),
             ],
           ),
           const SizedBox(height: 16),
-          // Full-width Coordination Risk Alerts panel
           Container(
             key: _alertsKey,
             child: const CoordinationAlertPanel(),
@@ -214,9 +197,173 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(height: 16),
         const DemographicsPanel(),
         const SizedBox(height: 16),
-        // Coordination Risk Alerts — full-width at bottom
         Container(key: _alertsKey, child: const CoordinationAlertPanel()),
       ],
+    );
+  }
+}
+
+// ── Left Platform Navigation Sidebar ─────────────────────────────────────────
+
+class _LeftPlatformNav extends StatelessWidget {
+  final Map<String, String?> platformOptions;
+  final Map<String, IconData> platformIcons;
+  final String selected;
+  final void Function(String) onSelect;
+
+  const _LeftPlatformNav({
+    required this.platformOptions,
+    required this.platformIcons,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 188,
+      color: AppTheme.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+            child: Text(
+              'PLATFORM',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textMuted,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
+          // Nav items
+          ...platformOptions.keys.map((label) {
+            final isSelected = label == selected;
+            final icon = platformIcons[label] ?? Icons.circle_outlined;
+            return _NavItem(
+              label: label,
+              icon: icon,
+              isSelected: isSelected,
+              onTap: () => onSelect(label),
+            );
+          }),
+          const Spacer(),
+          // Bottom divider + version hint
+          Divider(color: AppTheme.border, height: 1),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Row(
+              children: [
+                Icon(Icons.wifi_tethering_rounded, size: 12, color: AppTheme.textMuted),
+                const SizedBox(width: 6),
+                Text(
+                  'Live · v1.0',
+                  style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? AppTheme.accent
+                : _hovered
+                    ? AppTheme.accentGlow.withValues(alpha: 0.4)
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              // Platform icon — use custom text for X
+              widget.label == 'X (Twitter)'
+                  ? Text(
+                      '𝕏',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: widget.isSelected
+                            ? Colors.white
+                            : _hovered
+                                ? AppTheme.accentLight
+                                : AppTheme.textSecondary,
+                      ),
+                    )
+                  : Icon(
+                      widget.icon,
+                      size: 16,
+                      color: widget.isSelected
+                          ? Colors.white
+                          : _hovered
+                              ? AppTheme.accentLight
+                              : AppTheme.textSecondary,
+                    ),
+              const SizedBox(width: 10),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: widget.isSelected
+                      ? Colors.white
+                      : _hovered
+                          ? AppTheme.accentLight
+                          : AppTheme.textSecondary,
+                ),
+              ),
+              if (widget.isSelected) ...[
+                const Spacer(),
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -321,8 +468,6 @@ class _UserGreetingBanner extends StatelessWidget {
 
 // ── Alert badge shown in the AppBar ──────────────────────────────────────────
 
-/// Watches [coordinationAlertsProvider] and shows a badge with the count
-/// of high-risk alerts. Tapping it scrolls the user to the alerts panel
 class _AlertBadge extends ConsumerWidget {
   final VoidCallback onTap;
   const _AlertBadge({required this.onTap});
