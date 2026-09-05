@@ -169,37 +169,41 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildWideLayout() {
-    return Column(
-      children: [
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: SentimentChartPanel()),
-              const SizedBox(width: 16),
-              SizedBox(width: 320, child: TrendsPanel()),
-            ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(
+            height: 380,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: SentimentChartPanel()),
+                const SizedBox(width: 16),
+                SizedBox(width: 360, child: TrendsPanel()),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: NetworkGraphPanel()),
-              const SizedBox(width: 16),
-              SizedBox(width: 320, child: DemographicsPanel()),
-            ],
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 440,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: NetworkGraphPanel()),
+                const SizedBox(width: 16),
+                SizedBox(width: 360, child: DemographicsPanel()),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        // Full-width Coordination Risk Alerts panel
-        SizedBox(
-          key: _alertsKey,
-          height: 280,
-          child: CoordinationAlertPanel(),
-        ),
-      ],
+          const SizedBox(height: 16),
+          // Full-width Coordination Risk Alerts panel
+          SizedBox(
+            key: _alertsKey,
+            height: 280,
+            child: CoordinationAlertPanel(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -210,9 +214,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(height: 16),
         SizedBox(height: 340, child: TrendsPanel()),
         const SizedBox(height: 16),
-        SizedBox(height: 380, child: NetworkGraphPanel()),
+        SizedBox(height: 440, child: NetworkGraphPanel()),
         const SizedBox(height: 16),
-        SizedBox(height: 340, child: DemographicsPanel()),
+        SizedBox(height: 400, child: DemographicsPanel()),
         const SizedBox(height: 16),
         // Coordination Risk Alerts — full-width at bottom
         SizedBox(key: _alertsKey, height: 320, child: CoordinationAlertPanel()),
