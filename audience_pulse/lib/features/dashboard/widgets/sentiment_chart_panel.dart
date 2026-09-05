@@ -76,12 +76,18 @@ class _SentimentChartState extends State<_SentimentChart> {
     if (grouped.isEmpty) return const Center(child: Text('No data to chart.'));
 
     final sortedHours = grouped.keys.toList()..sort();
+    final bool isSinglePoint = sortedHours.length == 1;
+    if (isSinglePoint) {
+      sortedHours.add('now'); // Dummy X-axis label so we have 2 points to draw a line
+    }
 
     // Build one line per sentiment label
     final lines = <LineChartBarData>[];
     for (final label in _labels) {
       final points = sortedHours.asMap().entries.map((e) {
-        final count = (grouped[e.value]?[label] ?? 0).toDouble();
+        // If it's the dummy second point, copy the value from the first point
+        final bucketKey = (isSinglePoint && e.key == 1) ? sortedHours[0] : e.value;
+        final count = (grouped[bucketKey]?[label] ?? 0).toDouble();
         return FlSpot(e.key.toDouble(), count);
       }).toList();
 
@@ -91,11 +97,11 @@ class _SentimentChartState extends State<_SentimentChart> {
       lines.add(LineChartBarData(
         spots: points,
         color: color,
-        isCurved: true,
+        isCurved: !isSinglePoint,
         curveSmoothness: 0.3,
         barWidth: _touchedLabel == label ? 3 : 2,
         isStrokeCapRound: true,
-        dotData: FlDotData(show: false),
+        dotData: FlDotData(show: true),
         belowBarData: BarAreaData(
           show: _touchedLabel == label,
           color: color.withValues(alpha: 0.12),

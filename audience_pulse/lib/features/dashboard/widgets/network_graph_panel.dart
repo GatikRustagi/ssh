@@ -110,9 +110,9 @@ class _NetworkGraphViewState extends State<_NetworkGraphView> {
         Expanded(
           child: InteractiveViewer(
             constrained: false,
-            boundaryMargin: const EdgeInsets.all(80),
-            minScale: 0.3,
-            maxScale: 3.0,
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            minScale: 0.1,
+            maxScale: 5.0,
             child: GraphView(
               graph: _gvGraph,
               algorithm: _algorithm,
@@ -147,21 +147,18 @@ class _NetworkGraphViewState extends State<_NetworkGraphView> {
       onTap: () => setState(() {
         _selectedNode = _selectedNode?.id == node.id ? null : node;
       }),
-      child: Tooltip(
-        message: '${node.handle}\n${AppUtils.compactNumber(node.followerCount)} followers',
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: isKol
-                ? [BoxShadow(color: AppTheme.accentGlow, blurRadius: 12, spreadRadius: 2)]
-                : null,
-            border: isKol
-                ? Border.all(color: AppTheme.accentLight, width: 2)
-                : null,
-          ),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: isKol
+              ? [BoxShadow(color: AppTheme.accentGlow, blurRadius: 12, spreadRadius: 2)]
+              : null,
+          border: isKol
+              ? Border.all(color: AppTheme.accentLight, width: 2)
+              : null,
         ),
       ),
     );
