@@ -87,7 +87,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: const Icon(Icons.bar_chart_rounded, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
-          Text('AudiencePulse', style: Theme.of(context).textTheme.headlineMedium),
+          Text('Audie', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(width: 4),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

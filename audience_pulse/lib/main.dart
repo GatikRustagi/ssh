@@ -27,7 +27,7 @@ class AudiencePulseApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'AudiencePulse — AI Social Intelligence',
+      title: 'Audie — AI Social Intelligence',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       routerConfig: router,
