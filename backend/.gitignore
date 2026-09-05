@@ -1,0 +1,17 @@
+# Never commit real credentials
+.env
+*.session           # Telethon session files
+*.session-journal
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+pipeline.log

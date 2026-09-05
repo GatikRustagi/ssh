@@ -82,8 +82,8 @@ class _NetworkGraphViewState extends State<_NetworkGraphView> {
       if (src != null && tgt != null) {
         _gvGraph.addEdge(src, tgt,
           paint: Paint()
-            ..color = AppTheme.border
-            ..strokeWidth = edge.weight.clamp(1, 4).toDouble()
+            ..color = const Color(0xFF818CF8).withValues(alpha: 0.45)
+            ..strokeWidth = (edge.weight * 1.5).clamp(1.5, 4.5).toDouble()
             ..style = PaintingStyle.stroke,
         );
       }
@@ -110,9 +110,9 @@ class _NetworkGraphViewState extends State<_NetworkGraphView> {
         Expanded(
           child: InteractiveViewer(
             constrained: false,
-            boundaryMargin: const EdgeInsets.all(80),
-            minScale: 0.3,
-            maxScale: 3.0,
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            minScale: 0.1,
+            maxScale: 5.0,
             child: GraphView(
               graph: _gvGraph,
               algorithm: _algorithm,
@@ -140,39 +140,91 @@ class _NetworkGraphViewState extends State<_NetworkGraphView> {
   }
 
   Widget _buildNodeWidget(BuildContext context, m.NetworkNode node, bool isKol) {
-    final size = (8.0 + (node.followerCount / 10000).clamp(0.0, 20.0));
-    final color = isKol ? AppTheme.accent : AppTheme.textSecondary;
+    final nodeSize = (22.0 + (node.followerCount / 8000).clamp(0.0, 18.0));
+    final primaryColor = isKol ? AppTheme.accent : const Color(0xFF3B82F6);
+    final isSelected = _selectedNode?.id == node.id;
+    final initial = node.handle.replaceAll('@', '').isNotEmpty
+        ? node.handle.replaceAll('@', '').substring(0, 1).toUpperCase()
+        : '?';
 
     return GestureDetector(
       onTap: () => setState(() {
         _selectedNode = _selectedNode?.id == node.id ? null : node;
       }),
-      child: Tooltip(
-        message: '${node.handle}\n${AppUtils.compactNumber(node.followerCount)} followers',
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: isKol
-                ? [BoxShadow(color: AppTheme.accentGlow, blurRadius: 12, spreadRadius: 2)]
-                : null,
-            border: isKol
-                ? Border.all(color: AppTheme.accentLight, width: 2)
-                : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: nodeSize,
+            height: nodeSize,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isKol
+                    ? [AppTheme.accent, const Color(0xFF9333EA)]
+                    : [const Color(0xFF3B82F6), const Color(0xFF06B6D4)],
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: (isKol ? AppTheme.accentGlow : primaryColor).withValues(alpha: isSelected ? 0.8 : 0.4),
+                  blurRadius: isKol ? 14 : 8,
+                  spreadRadius: isSelected ? 3 : 1,
+                ),
+              ],
+              border: Border.all(
+                color: isSelected
+                    ? Colors.white
+                    : (isKol ? AppTheme.accentLight : primaryColor.withValues(alpha: 0.8)),
+                width: isSelected ? 2.5 : 1.5,
+              ),
+            ),
+            child: Center(
+              child: isKol
+                  ? const Icon(Icons.star_rounded, size: 13, color: Colors.white)
+                  : Text(
+                      initial,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+            ),
           ),
-        ),
+          const SizedBox(height: 3),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceHigh.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: isSelected
+                    ? AppTheme.accent
+                    : AppTheme.border.withValues(alpha: 0.6),
+              ),
+            ),
+            child: Text(
+              node.handle,
+              style: TextStyle(
+                color: isKol ? AppTheme.accentLight : AppTheme.textSecondary,
+                fontSize: 9.5,
+                fontWeight: isKol ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildKolLegend(BuildContext context, List<m.NetworkNode> kols) {
-    return Row(
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 6,
+      runSpacing: 4,
       children: [
         Text('KOLs: ', style: Theme.of(context).textTheme.labelSmall),
         ...kols.map((n) => Container(
-          margin: const EdgeInsets.only(right: 6),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
             color: AppTheme.accentGlow,
