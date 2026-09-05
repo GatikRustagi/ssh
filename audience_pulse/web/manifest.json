@@ -1,6 +1,6 @@
 {
-    "name": "audience_pulse",
-    "short_name": "audience_pulse",
+    "name": "audie",
+    "short_name": "audie",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
