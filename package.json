@@ -1,0 +1,14 @@
+{
+  "name": "ssh-scraper",
+  "version": "1.0.0",
+  "description": "Twitter scraper for SIH 2026",
+  "main": "twitter_scraper.js",
+  "scripts": {
+    "start": "node twitter_scraper.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "agent-twitter-client": "^0.0.18",
+    "dotenv": "^16.4.5",
+  }
+}

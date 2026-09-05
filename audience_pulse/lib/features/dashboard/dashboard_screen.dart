@@ -115,6 +115,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
         ),
         const SizedBox(width: 8),
+
         // Live coordination-risk alert badge
         _AlertBadge(onTap: _scrollToAlerts),
         const SizedBox(width: 8),

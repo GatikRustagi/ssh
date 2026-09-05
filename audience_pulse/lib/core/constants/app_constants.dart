@@ -6,9 +6,11 @@ class AppConstants {
   AppConstants._();
 
   // ── Route Paths ───────────────────────────────────────────────────────────
-  static const String routeLogin     = '/login';
-  static const String routeDashboard = '/dashboard';
-  static const String routeIngestion = '/ingestion';
+  static const String routeLogin           = '/login';
+  static const String routeDashboard       = '/dashboard';
+  static const String routeIngestion       = '/ingestion';
+  static const String routeTwitterDetails  = '/twitter-details';
+  static const String routeTrends          = '/trends';
 
   // ── Supabase Table Names ──────────────────────────────────────────────────
   static const String tablePlatforms           = 'platforms';
