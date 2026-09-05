@@ -68,7 +68,7 @@ def scan_for_bots():
         text_to_post_ids[msg].append(post.get("id"))
         text_to_samples[msg] = post
 
-    # C. Check if any text was repeated by multiple different authors
+    # C. Check if any text was repeated by multiple different authors (Duplicate Text)
     bot_detected = False
     now_utc = datetime.now(timezone.utc)
     window_start = (now_utc - timedelta(minutes=TIME_WINDOW_MINUTES)).isoformat()
@@ -83,12 +83,11 @@ def scan_for_bots():
             alarm_message = f"[bold yellow]👉 Message:[/bold yellow] [white]\"{msg[:60]}...\"[/white]\n"
             alarm_message += f"[bold yellow]👉 Shared by:[/bold yellow] [bold red]{count} different accounts![/bold red]"
             
-            console.print(Panel(alarm_message, title="🚨 ALERT! Found coordinated attack! 🚨", border_style="red", expand=False))
+            console.print(Panel(alarm_message, title="🚨 ALERT! Found Coordinated Text Attack! 🚨", border_style="red", expand=False))
 
             sample_post = text_to_samples[msg]
             matching_post_ids = text_to_post_ids[msg]
 
-            # D. Insert alarm into Supabase matching its table schema
             narrative_label = f"Coordinated Bot Burst ({count} Accounts)"
             alert_data = {
                 "narrative_label": narrative_label,
@@ -104,7 +103,6 @@ def scan_for_bots():
                 "resolved": False
             }
 
-            # Avoid duplicate alerts for the exact same narrative in the same run
             existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
             if not existing.data:
                 supabase.table("coordination_alerts").insert(alert_data).execute()
@@ -112,8 +110,62 @@ def scan_for_bots():
             else:
                 console.print("[dim cyan]ℹ️ Alert for this attack was already logged in Supabase.[/dim cyan]\n")
 
+    # =========================================================================
+    # NEW SUPERPOWER: Idea 3 - The "Hashtag Swarm" Detector
+    # =========================================================================
+    import re
+    hashtag_to_authors = defaultdict(set)
+    hashtag_to_post_ids = defaultdict(list)
+    
+    # 1. Look inside every post for hashtags
+    for post in posts:
+        msg = post.get("content_text", "").lower()
+        author = post.get("author_id")
+        post_id = post.get("id")
+        
+        # Pull out any word that starts with # (like #BuyMyFakeCoin)
+        hashtags_found = set(re.findall(r'#\w+', msg))
+        
+        for hashtag in hashtags_found:
+            hashtag_to_authors[hashtag].add(author)
+            hashtag_to_post_ids[hashtag].append(post_id)
+
+    # 2. Check if a hashtag is being used by too many different people!
+    for hashtag, authors in hashtag_to_authors.items():
+        count = len(authors)
+        if count >= BOT_THRESHOLD:
+            bot_detected = True
+            
+            swarm_message = f"[bold yellow]👉 Hashtag:[/bold yellow] [white]{hashtag}[/white]\n"
+            swarm_message += f"[bold yellow]👉 Used by:[/bold yellow] [bold red]{count} different accounts![/bold red]"
+            
+            console.print(Panel(swarm_message, title="🚨 ALERT! Hashtag Swarm Detected! 🚨", border_style="magenta", expand=False))
+
+            narrative_label = f"Hashtag Swarm: {hashtag} ({count} Accounts)"
+            alert_data = {
+                "narrative_label": narrative_label,
+                "risk_level": "high" if count >= 4 else "medium",
+                "risk_score": round(min(0.99, 0.4 + (count * 0.1)), 2),
+                "evidence": [
+                    f"Hashtag {hashtag} was suddenly used by {count} unique accounts.",
+                    f"Time window: {TIME_WINDOW_MINUTES} minutes."
+                ],
+                "post_ids": hashtag_to_post_ids[hashtag],
+                "window_start": window_start,
+                "window_end": window_end,
+                "resolved": False
+            }
+
+            existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
+            if not existing.data:
+                supabase.table("coordination_alerts").insert(alert_data).execute()
+                console.print("[bold green]✅ Hashtag Swarm Alert logged to Supabase![/bold green]\n")
+            else:
+                console.print("[dim cyan]ℹ️ This hashtag swarm was already logged.[/dim cyan]\n")
+    # =========================================================================
+
     if not bot_detected:
-        console.print("[bold green]✅ Playground is safe! No copycat bot swarms detected.[/bold green]")
+        console.print("[bold green]✅ Playground is safe! No copycat bots or hashtag swarms detected.[/bold green]")
 
 if __name__ == "__main__":
     console.print(Panel("[bold cyan]👮‍♂️ Bot Police is on duty! Press Ctrl+C to stop.[/bold cyan]", expand=False))
