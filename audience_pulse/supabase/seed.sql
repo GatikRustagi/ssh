@@ -228,3 +228,120 @@ INSERT INTO demographic_summaries (id, platform_id, age_bracket, region, languag
   ('77777777-0000-0000-0000-000000000011','11111111-0000-0000-0000-000000000002','25-34','UAE',    'en','Finance & Trading',     31800, NOW()-INTERVAL '1 hour'),
   ('77777777-0000-0000-0000-000000000012','11111111-0000-0000-0000-000000000002','35-44','Global', 'en','Policy & Regulation',   18700, NOW()-INTERVAL '1 hour'),
   ('77777777-0000-0000-0000-000000000013','11111111-0000-0000-0000-000000000002','45+',  'India',  'hi','Government & Civic',    9200,  NOW()-INTERVAL '1 hour');
+
+-- ============================================================
+-- SOCIALSHIELD DEMO SCENARIO — #SafeCity Coordination Burst
+-- ============================================================
+-- 14 near-duplicate posts from 11 different X and Telegram authors
+-- posted within a 7-minute window, all sharing the same URL.
+-- This dataset reliably triggers all four coordination-risk rules:
+--   1. Duplicate burst (≥8 near-duplicates in 10 min)
+--   2. Shared URL (12/14 posts link to the same article)
+--   3. Growth anomaly (14 posts vs 3-post baseline = +367%)
+--   4. Cross-account velocity (11 distinct authors in 5 min)
+--
+-- The alert the judge should see:
+--   "#SafeCity: 14 near-duplicate posts from 11 accounts in 7 minutes;
+--    12 share the same URL; cluster density is HIGH."
+-- ============================================================
+
+-- Use existing X author IDs for posts 1-10, Telegram for 11-14
+
+INSERT INTO posts (id, platform_id, author_id, content_text, posted_at, raw_engagement_count, url) VALUES
+  -- Minute 0 — first two accounts post
+  ('88888888-0000-0000-0000-000000000001','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000001',
+   'Our city deserves better security. #SafeCity initiative needs your support NOW. Join the movement: https://safecity.example.com/petition 🔴',
+   NOW()-INTERVAL '3 hours', 210, 'https://safecity.example.com/petition'),
+
+  ('88888888-0000-0000-0000-000000000002','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000002',
+   'Our city deserves better security. #SafeCity initiative needs your support now. Join the movement: https://safecity.example.com/petition 🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '1 minute', 198, 'https://safecity.example.com/petition'),
+
+  -- Minute 1 — third and fourth accounts
+  ('88888888-0000-0000-0000-000000000003','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000003',
+   'Our city deserves better security. The #SafeCity initiative needs your support NOW. Join the movement: https://safecity.example.com/petition',
+   NOW()-INTERVAL '3 hours'+INTERVAL '1 minute 30 seconds', 185, 'https://safecity.example.com/petition'),
+
+  ('88888888-0000-0000-0000-000000000004','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000004',
+   'Our city deserves better security! #SafeCity initiative needs your support NOW. Join the movement https://safecity.example.com/petition 🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '2 minutes', 172, 'https://safecity.example.com/petition'),
+
+  -- Minute 2
+  ('88888888-0000-0000-0000-000000000005','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000005',
+   'Our city deserves better security. #SafeCity initiative needs your support now! Join the movement: https://safecity.example.com/petition',
+   NOW()-INTERVAL '3 hours'+INTERVAL '2 minutes 45 seconds', 241, 'https://safecity.example.com/petition'),
+
+  ('88888888-0000-0000-0000-000000000006','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000006',
+   'Our city deserves better security — the #SafeCity initiative needs your support NOW. Join: https://safecity.example.com/petition 🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '3 minutes', 163, 'https://safecity.example.com/petition'),
+
+  -- Minute 3
+  ('88888888-0000-0000-0000-000000000007','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000007',
+   'Our city deserves better security. #SafeCity initiative needs support NOW. Join the movement: https://safecity.example.com/petition 🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '3 minutes 20 seconds', 157, 'https://safecity.example.com/petition'),
+
+  ('88888888-0000-0000-0000-000000000008','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000008',
+   'Our city deserves much better security. #SafeCity initiative needs your support NOW. Join the movement https://safecity.example.com/petition',
+   NOW()-INTERVAL '3 hours'+INTERVAL '4 minutes', 189, 'https://safecity.example.com/petition'),
+
+  -- Minute 4
+  ('88888888-0000-0000-0000-000000000009','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000009',
+   'Our city deserves better security. #SafeCity initiative needs your support NOW — join the movement: https://safecity.example.com/petition 🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '4 minutes 30 seconds', 143, 'https://safecity.example.com/petition'),
+
+  ('88888888-0000-0000-0000-000000000010','11111111-0000-0000-0000-000000000001','22222222-0000-0000-0000-000000000010',
+   'Our city deserves better security. The #SafeCity initiative needs your support now. Join: https://safecity.example.com/petition 🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '5 minutes', 201, 'https://safecity.example.com/petition'),
+
+  -- Minute 5–6 — Telegram picks it up (forwarding the same link)
+  ('88888888-0000-0000-0000-000000000011','11111111-0000-0000-0000-000000000002','22222222-0000-0000-0000-000000000011',
+   'Our city deserves better security. #SafeCity initiative needs your support NOW. Join the movement https://safecity.example.com/petition',
+   NOW()-INTERVAL '3 hours'+INTERVAL '5 minutes 15 seconds', 320, 'https://safecity.example.com/petition'),
+
+  ('88888888-0000-0000-0000-000000000012','11111111-0000-0000-0000-000000000002','22222222-0000-0000-0000-000000000012',
+   'Our city deserves better security — #SafeCity initiative needs your support NOW. Join: https://safecity.example.com/petition 🔴🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '5 minutes 50 seconds', 445, 'https://safecity.example.com/petition'),
+
+  -- Minute 6–7 — two more Telegram accounts, one without the URL (variation)
+  ('88888888-0000-0000-0000-000000000013','11111111-0000-0000-0000-000000000002','22222222-0000-0000-0000-000000000013',
+   'Our city deserves better security. #SafeCity initiative needs your support NOW. Join the movement: https://safecity.example.com/petition',
+   NOW()-INTERVAL '3 hours'+INTERVAL '6 minutes 10 seconds', 278, 'https://safecity.example.com/petition'),
+
+  ('88888888-0000-0000-0000-000000000014','11111111-0000-0000-0000-000000000002','22222222-0000-0000-0000-000000000014',
+   'City needs better security! #SafeCity initiative needs your support NOW. Spread the word! 🔴',
+   NOW()-INTERVAL '3 hours'+INTERVAL '7 minutes', 192, NULL);
+
+-- Sentiment scores for the SafeCity burst — mostly "anxious" and "supportive"
+INSERT INTO sentiment_scores (id, post_id, sentiment_label, confidence, scored_at) VALUES
+  ('99999999-0000-0000-0000-000000000001','88888888-0000-0000-0000-000000000001','anxious',   0.82, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000002','88888888-0000-0000-0000-000000000002','anxious',   0.79, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000003','88888888-0000-0000-0000-000000000003','anxious',   0.81, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000004','88888888-0000-0000-0000-000000000004','anxious',   0.77, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000005','88888888-0000-0000-0000-000000000005','supportive',0.72, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000006','88888888-0000-0000-0000-000000000006','anxious',   0.83, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000007','88888888-0000-0000-0000-000000000007','anxious',   0.80, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000008','88888888-0000-0000-0000-000000000008','supportive',0.68, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000009','88888888-0000-0000-0000-000000000009','anxious',   0.85, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000010','88888888-0000-0000-0000-000000000010','anxious',   0.78, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000011','88888888-0000-0000-0000-000000000011','anxious',   0.87, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000012','88888888-0000-0000-0000-000000000012','anxious',   0.91, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000013','88888888-0000-0000-0000-000000000013','anxious',   0.84, NOW()-INTERVAL '3 hours'),
+  ('99999999-0000-0000-0000-000000000014','88888888-0000-0000-0000-000000000014','supportive',0.71, NOW()-INTERVAL '3 hours');
+
+-- SafeCity trend row — the spike judges will see on the Trend Radar
+INSERT INTO trends (id, keyword_or_topic, platform_id, mention_count, growth_rate, window_start, window_end) VALUES
+  ('55555555-0000-0000-0000-000000000011','#SafeCity', NULL, 14, 367.0, NOW()-INTERVAL '3 hours', NOW()-INTERVAL '3 hours'+INTERVAL '7 minutes');
+
+-- SafeCity network edges — the coordinated forwarding cluster
+INSERT INTO network_edges (id, source_author_id, target_author_id, interaction_type, weight, occurred_at) VALUES
+  ('66666666-0000-0000-0000-000000000016','22222222-0000-0000-0000-000000000002','22222222-0000-0000-0000-000000000001','retweet',3, NOW()-INTERVAL '3 hours'+INTERVAL '1 minute'),
+  ('66666666-0000-0000-0000-000000000017','22222222-0000-0000-0000-000000000003','22222222-0000-0000-0000-000000000001','retweet',3, NOW()-INTERVAL '3 hours'+INTERVAL '2 minutes'),
+  ('66666666-0000-0000-0000-000000000018','22222222-0000-0000-0000-000000000004','22222222-0000-0000-0000-000000000001','retweet',3, NOW()-INTERVAL '3 hours'+INTERVAL '2 minutes'),
+  ('66666666-0000-0000-0000-000000000019','22222222-0000-0000-0000-000000000005','22222222-0000-0000-0000-000000000001','retweet',4, NOW()-INTERVAL '3 hours'+INTERVAL '3 minutes'),
+  ('66666666-0000-0000-0000-000000000020','22222222-0000-0000-0000-000000000006','22222222-0000-0000-0000-000000000001','retweet',3, NOW()-INTERVAL '3 hours'+INTERVAL '3 minutes'),
+  ('66666666-0000-0000-0000-000000000021','22222222-0000-0000-0000-000000000007','22222222-0000-0000-0000-000000000001','retweet',3, NOW()-INTERVAL '3 hours'+INTERVAL '4 minutes'),
+  ('66666666-0000-0000-0000-000000000022','22222222-0000-0000-0000-000000000008','22222222-0000-0000-0000-000000000001','retweet',3, NOW()-INTERVAL '3 hours'+INTERVAL '4 minutes'),
+  ('66666666-0000-0000-0000-000000000023','22222222-0000-0000-0000-000000000011','22222222-0000-0000-0000-000000000001','forward',5, NOW()-INTERVAL '3 hours'+INTERVAL '5 minutes'),
+  ('66666666-0000-0000-0000-000000000024','22222222-0000-0000-0000-000000000012','22222222-0000-0000-0000-000000000001','forward',5, NOW()-INTERVAL '3 hours'+INTERVAL '6 minutes'),
+  ('66666666-0000-0000-0000-000000000025','22222222-0000-0000-0000-000000000013','22222222-0000-0000-0000-000000000001','forward',4, NOW()-INTERVAL '3 hours'+INTERVAL '6 minutes'),
+  ('66666666-0000-0000-0000-000000000026','22222222-0000-0000-0000-000000000014','22222222-0000-0000-0000-000000000012','forward',3, NOW()-INTERVAL '3 hours'+INTERVAL '7 minutes');

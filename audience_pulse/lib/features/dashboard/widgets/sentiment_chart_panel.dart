@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../models/sentiment_score.dart';
+import '../../../models/analysis_models.dart';
 import '../providers/dashboard_providers.dart';
 import 'panel_card.dart';
 
@@ -17,14 +18,31 @@ class SentimentChartPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(sentimentTimelineProvider);
 
+    final explainer = ref.watch(sentimentExplainerProvider);
+
     return PanelCard(
       title: 'Sentiment Timeline',
       icon: Icons.show_chart_rounded,
       panelKey: 'sentiment',
-      child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => _ErrorView(message: e.toString()),
-        data: (scores) => _SentimentChart(scores: scores),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: async.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => _ErrorView(message: e.toString()),
+              data: (scores) => _SentimentChart(scores: scores),
+            ),
+          ),
+          // ── Because chip ─────────────────────────────────────────────────
+          explainer.when(
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (result) => result != null && result.isConfident
+                ? _BecauseChip(result: result)
+                : const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }
@@ -211,3 +229,57 @@ class _ErrorView extends StatelessWidget {
     child: Text('Error: $message', style: const TextStyle(color: Color(0xFFEF4444))),
   );
 }
+
+/// Displays the dominant-label evidence string from [AnalysisEngine]
+/// as a small chip beneath the sentiment timeline.
+///
+/// Example: "because: matched: excited(+0.9), breakthrough(+0.8)"
+class _BecauseChip extends StatelessWidget {
+  final SentimentResult result;
+  const _BecauseChip({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = AppConstants.sentimentColors[result.label] ?? AppTheme.textMuted;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, bottom: 2),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AppConstants.sentimentEmoji[result.label] ?? '',
+              style: const TextStyle(fontSize: 12),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              '${result.label}  ·  ',
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Flexible(
+              child: Text(
+                result.because,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 11,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

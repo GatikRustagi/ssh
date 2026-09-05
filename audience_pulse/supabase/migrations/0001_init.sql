@@ -181,3 +181,38 @@ CREATE POLICY "anon_read_demographic_summaries" ON demographic_summaries FOR SEL
 -- Enable Realtime on the two live-updating tables
 ALTER PUBLICATION supabase_realtime ADD TABLE posts;
 ALTER PUBLICATION supabase_realtime ADD TABLE sentiment_scores;
+
+-- ============================================================
+-- TABLE: coordination_alerts (SocialShield)
+-- Written by the rule engine (Edge Function or Dart service).
+-- Read by the Coordination Alert Panel in the dashboard.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS coordination_alerts (
+  id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  narrative_label  TEXT NOT NULL,
+  risk_level       TEXT NOT NULL CHECK (risk_level IN ('high', 'medium', 'low')),
+  risk_score       FLOAT NOT NULL CHECK (risk_score >= 0 AND risk_score <= 1),
+  evidence         JSONB NOT NULL DEFAULT '[]',   -- array of {rule_id, evidence, weight}
+  post_ids         UUID[] NOT NULL DEFAULT '{}',  -- posts that triggered this alert
+  window_start     TIMESTAMPTZ NOT NULL,
+  window_end       TIMESTAMPTZ NOT NULL,
+  resolved         BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_coord_risk_level  ON coordination_alerts(risk_level);
+CREATE INDEX IF NOT EXISTS idx_coord_created_at  ON coordination_alerts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_coord_resolved    ON coordination_alerts(resolved);
+
+ALTER TABLE coordination_alerts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "auth_read_coordination_alerts"
+  ON coordination_alerts FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "anon_read_coordination_alerts"
+  ON coordination_alerts FOR SELECT TO anon USING (true);
+
+-- Realtime: push new alerts to the dashboard instantly
+ALTER PUBLICATION supabase_realtime ADD TABLE coordination_alerts;
+
