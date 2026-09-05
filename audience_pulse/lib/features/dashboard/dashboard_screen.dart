@@ -103,6 +103,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
         ),
         const SizedBox(width: 8),
+        // Trend analysis button
+        TextButton.icon(
+          key: const Key('trend_analysis_btn'),
+          onPressed: () => context.go(AppConstants.routeTrends),
+          icon: const Icon(Icons.trending_up_rounded, size: 16),
+          label: const Text('Trends'),
+          style: TextButton.styleFrom(foregroundColor: AppTheme.accentLight),
+        ),
+        const SizedBox(width: 8),
+        // Twitter raw data button
+        TextButton.icon(
+          key: const Key('twitter_details_btn'),
+          onPressed: () => context.go(AppConstants.routeTwitterDetails),
+          icon: const Icon(Icons.tag_rounded, size: 16),
+          label: const Text('Raw Tweets'),
+          style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
+        ),
+        const SizedBox(width: 8),
         // Live coordination-risk alert badge
         _AlertBadge(),
         const SizedBox(width: 8),
