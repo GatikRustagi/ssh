@@ -35,6 +35,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   };
 
   String _selectedPlatformLabel = 'All Platforms';
+  final GlobalKey _alertsKey = GlobalKey();
+
+  void _scrollToAlerts() {
+    final ctx = _alertsKey.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      ).catchError((_) {}); // Ignore if no Scrollable is found
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +134,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         const SizedBox(width: 8),
         // Live coordination-risk alert badge
-        _AlertBadge(),
+        _AlertBadge(onTap: _scrollToAlerts),
         const SizedBox(width: 8),
         // Sign out
         IconButton(
@@ -201,6 +213,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(height: 16),
         // Full-width Coordination Risk Alerts panel
         SizedBox(
+          key: _alertsKey,
           height: 280,
           child: CoordinationAlertPanel(),
         ),
@@ -220,7 +233,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         SizedBox(height: 340, child: DemographicsPanel()),
         const SizedBox(height: 16),
         // Coordination Risk Alerts — full-width at bottom
-        SizedBox(height: 320, child: CoordinationAlertPanel()),
+        SizedBox(key: _alertsKey, height: 320, child: CoordinationAlertPanel()),
       ],
     );
   }
@@ -230,9 +243,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
 /// Watches [coordinationAlertsProvider] and shows a badge with the count
 /// of high-risk alerts. Tapping it scrolls the user to the alerts panel
-/// (currently a visual indicator only; extend with a scroll controller if needed).
 class _AlertBadge extends ConsumerWidget {
-  const _AlertBadge();
+  final VoidCallback onTap;
+  const _AlertBadge({required this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -243,29 +256,33 @@ class _AlertBadge extends ConsumerWidget {
       data: (alerts) {
         final highCount = alerts.where((a) => a.isHighRisk).length;
         if (highCount == 0) return const SizedBox.shrink();
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: AppTheme.sentimentNegative.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: AppTheme.sentimentNegative.withValues(alpha: 0.5),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('🔴', style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 5),
-              Text(
-                '$highCount High-Risk Alert${highCount == 1 ? '' : 's'}',
-                style: const TextStyle(
-                  color: AppTheme.sentimentNegative,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
+        return InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: AppTheme.sentimentNegative.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.sentimentNegative.withValues(alpha: 0.5),
               ),
-            ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🔴', style: TextStyle(fontSize: 12)),
+                const SizedBox(width: 5),
+                Text(
+                  '$highCount High-Risk Alert${highCount == 1 ? '' : 's'}',
+                  style: const TextStyle(
+                    color: AppTheme.sentimentNegative,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
