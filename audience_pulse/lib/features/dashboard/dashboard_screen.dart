@@ -9,7 +9,8 @@ import '../dashboard/providers/dashboard_providers.dart';
 import 'widgets/sentiment_chart_panel.dart';
 import 'widgets/trends_panel.dart';
 import 'widgets/network_graph_panel.dart';
-import 'widgets/crisis_matrix_panel.dart';
+
+import 'widgets/demographics_panel.dart';
 import 'widgets/coordination_alert_panel.dart';
 import 'widgets/smart_summary_panel.dart';
 
@@ -175,7 +176,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              SizedBox(width: 340, child: const CrisisMatrixPanel()),
+              SizedBox(width: 340, child: const DemographicsPanel()),
             ],
           ),
         ],
@@ -194,7 +195,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(height: 16),
         const NetworkGraphPanel(),
         const SizedBox(height: 16),
-        const CrisisMatrixPanel(),
+        const DemographicsPanel(),
         const SizedBox(height: 16),
         Container(key: _alertsKey, child: const CoordinationAlertPanel()),
       ],
