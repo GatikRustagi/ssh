@@ -100,7 +100,7 @@ class _SentimentChartState extends State<_SentimentChart> {
     final sortedHours = grouped.keys.toList()..sort();
     final bool isSinglePoint = sortedHours.length == 1;
     if (isSinglePoint) {
-      sortedHours.add('now'); // Dummy X-axis label
+      sortedHours.add(sortedHours.first + 3600000); // Dummy +1 hour X-axis label
     }
 
     final labelsToDraw = _selectedEmotion == 'All' ? _emotions : [_selectedEmotion];
@@ -168,13 +168,20 @@ class _SentimentChartState extends State<_SentimentChart> {
                         getTooltipColor: (_) => AppTheme.surfaceHigh,
                         tooltipRoundedRadius: 8,
                         getTooltipItems: (spots) => spots.map((spot) {
-                          final time = sortedHours[spot.x.toInt()];
+                          final timeMs = sortedHours[spot.x.toInt()];
+                          final timeDt = DateTime.fromMillisecondsSinceEpoch(timeMs);
+                          final amPm = timeDt.hour < 12 ? 'AM' : 'PM';
+                          final h = timeDt.hour % 12 == 0 ? 12 : timeDt.hour % 12;
+                          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                          final monthStr = months[timeDt.month - 1];
+                          final timeStr = '$monthStr ${timeDt.day}, $h $amPm';
+                          
                           return LineTooltipItem(
                             '${spot.y.toInt()} posts\n',
                             const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
                             children: [
                               TextSpan(
-                                text: time,
+                                text: timeStr,
                                 style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.normal),
                               ),
                             ],
@@ -192,17 +199,14 @@ class _SentimentChartState extends State<_SentimentChart> {
     );
   }
 
-  Map<String, Map<String, int>> _groupByHourAndLabel(List<SentimentScore> scores) {
-    final result = <String, Map<String, int>>{};
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  Map<int, Map<String, int>> _groupByHourAndLabel(List<SentimentScore> scores) {
+    final result = <int, Map<String, int>>{};
     
     for (final score in scores) {
       final dt = score.postedAt ?? score.scoredAt;
-      final amPm = dt.hour < 12 ? 'AM' : 'PM';
-      final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-      final monthStr = months[dt.month - 1];
+      final hourDt = DateTime(dt.year, dt.month, dt.day, dt.hour);
+      final bucket = hourDt.millisecondsSinceEpoch;
       
-      final bucket = '$monthStr ${dt.day}, $h $amPm';
       result.putIfAbsent(bucket, () => {});
       result[bucket]![score.sentimentLabel] =
           (result[bucket]![score.sentimentLabel] ?? 0) + 1;
