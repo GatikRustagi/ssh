@@ -206,24 +206,24 @@ final lastUpdatedProvider =
   (ref) => LastUpdatedNotifier(),
 );
 
-// ── Saved Investigations ──────────────────────────────────────────────────────
-class SavedAlertsNotifier extends StateNotifier<List<CoordinationRiskResult>> {
-  SavedAlertsNotifier() : super([]);
+// ── Saved Trends ──────────────────────────────────────────────────────────────
+class SavedTrendsNotifier extends StateNotifier<List<Trend>> {
+  SavedTrendsNotifier() : super([]);
 
-  void saveAlert(CoordinationRiskResult alert) {
-    if (!state.any((a) => a.narrativeLabel == alert.narrativeLabel)) {
-      state = [...state, alert];
+  void saveTrend(Trend trend) {
+    if (!state.any((t) => t.id == trend.id)) {
+      state = [...state, trend];
     }
   }
 
-  void removeAlert(String narrativeLabel) {
-    state = state.where((a) => a.narrativeLabel != narrativeLabel).toList();
+  void removeTrend(String id) {
+    state = state.where((t) => t.id != id).toList();
   }
 }
 
-final savedAlertsProvider =
-    StateNotifierProvider<SavedAlertsNotifier, List<CoordinationRiskResult>>(
-  (ref) => SavedAlertsNotifier(),
+final savedTrendsProvider =
+    StateNotifierProvider<SavedTrendsNotifier, List<Trend>>(
+  (ref) => SavedTrendsNotifier(),
 );
 
 // ── Fallback Mock Generators ──────────────────────────────────────────────────

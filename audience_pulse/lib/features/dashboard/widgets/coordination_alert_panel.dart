@@ -174,26 +174,6 @@ class _AlertTileState extends ConsumerState<_AlertTile> {
                   ),
                   const SizedBox(width: 6),
 
-                  // Save Button
-                  IconButton(
-                    icon: const Icon(Icons.bookmark_add_outlined, size: 18),
-                    color: AppTheme.textSecondary,
-                    tooltip: 'Save investigation',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      ref.read(savedAlertsProvider.notifier).saveAlert(a);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Saved "${a.narrativeLabel}" to investigations.'),
-                          duration: const Duration(seconds: 2),
-                          backgroundColor: AppTheme.surfaceHigh,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 8),
-
                   // Expand chevron
                   AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../models/analysis_models.dart';
+import '../../../core/utils/app_utils.dart';
+import '../../../models/trend.dart';
+import '../../../services/analysis_engine.dart';
 import '../providers/dashboard_providers.dart';
 import 'panel_card.dart';
 
@@ -11,15 +13,15 @@ class SavedInvestigationsPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final savedAlerts = ref.watch(savedAlertsProvider);
+    final savedTrends = ref.watch(savedTrendsProvider);
 
     return PanelCard(
-      title: 'Saved Investigations',
+      title: 'Saved Trends',
       icon: Icons.bookmark_outline,
       panelKey: 'saved_investigations',
-      child: savedAlerts.isEmpty
+      child: savedTrends.isEmpty
           ? _EmptyState()
-          : _SavedList(alerts: savedAlerts),
+          : _SavedList(trends: savedTrends),
     );
   }
 }
@@ -35,14 +37,14 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.bookmark_border_rounded, size: 32, color: AppTheme.border),
           const SizedBox(height: 12),
           Text(
-            'No saved investigations yet.',
+            'No saved trends yet.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Click the bookmark icon on any alert to save it here for later review.',
+            'Click the bookmark icon on any top trend to save it here for later review.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppTheme.textMuted,
             ),
@@ -55,20 +57,22 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _SavedList extends ConsumerWidget {
-  final List<CoordinationRiskResult> alerts;
-  const _SavedList({required this.alerts});
+  final List<Trend> trends;
+  const _SavedList({required this.trends});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: alerts.length,
+      itemCount: trends.length,
       separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, i) {
-        final alert = alerts[i];
-        final isHigh = alert.riskLevel == RiskLevel.high;
-        final color = isHigh ? AppTheme.sentimentNegative : AppTheme.sentimentSarcastic;
+        final trend = trends[i];
+        final sentiment = AnalysisEngine.instance.classifySentiment(trend.keywordOrTopic);
+        final isNegative = sentiment.label == 'negative' || sentiment.label == 'anxious' || sentiment.label == 'against';
+        final isRising = !isNegative;
+        final color = isRising ? AppTheme.sentimentPositive : AppTheme.sentimentNegative;
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -89,14 +93,14 @@ class _SavedList extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      alert.narrativeLabel,
+                      trend.keywordOrTopic,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      alert.shortSummary,
+                      '${AppUtils.compactNumber(trend.mentionCount)} mentions',
                       style: Theme.of(context).textTheme.bodySmall,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -107,7 +111,7 @@ class _SavedList extends ConsumerWidget {
                 color: AppTheme.textSecondary,
                 tooltip: 'Remove from saved',
                 onPressed: () {
-                  ref.read(savedAlertsProvider.notifier).removeAlert(alert.narrativeLabel);
+                  ref.read(savedTrendsProvider.notifier).removeTrend(trend.id);
                 },
               ),
             ],

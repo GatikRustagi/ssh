@@ -99,13 +99,13 @@ class _TrendsList extends StatelessWidget {
   }
 }
 
-class _TrendTile extends StatelessWidget {
+class _TrendTile extends ConsumerWidget {
   final Trend trend;
   final int rank;
   const _TrendTile({required this.trend, required this.rank});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final sentiment = AnalysisEngine.instance.classifySentiment(trend.keywordOrTopic);
     final isNegative = sentiment.label == 'negative' || sentiment.label == 'anxious' || sentiment.label == 'against';
     final displayRate = trend.growthRate.abs();
@@ -152,6 +152,26 @@ class _TrendTile extends StatelessWidget {
             ),
           ),
 
+          const SizedBox(width: 8),
+
+          // Save Button
+          IconButton(
+            icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+            color: AppTheme.textSecondary,
+            tooltip: 'Save trend',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () {
+              ref.read(savedTrendsProvider.notifier).saveTrend(trend);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Saved "${trend.keywordOrTopic}" to investigations.'),
+                  duration: const Duration(seconds: 2),
+                  backgroundColor: AppTheme.surfaceHigh,
+                ),
+              );
+            },
+          ),
           const SizedBox(width: 8),
 
           // Growth rate indicator
