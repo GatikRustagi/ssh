@@ -36,6 +36,6 @@ echo "Logs are being saved to: backend_scripts/twitter.log and scripts/sentiment
 echo ""
 echo "🎨 Now starting the Flutter Dashboard..."
 
-# 3. Start the Frontend in the foreground
+# 3. Start the Frontend in the foreground (fixed port for Google OAuth)
 flutter clean
-flutter run -d chrome
+flutter run -d chrome --web-port 3000

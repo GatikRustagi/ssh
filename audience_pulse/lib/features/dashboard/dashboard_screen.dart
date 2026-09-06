@@ -132,8 +132,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           tooltip: 'Sign out',
           icon: const Icon(Icons.logout_rounded, size: 18),
           onPressed: () async {
-            await SupabaseService.instance.signOut();
-            if (context.mounted) context.go(AppConstants.routeLogin);
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                backgroundColor: AppTheme.surface,
+                title: const Text('Sign Out', style: TextStyle(color: AppTheme.textPrimary)),
+                content: const Text('Are you sure you want to sign out?', style: TextStyle(color: AppTheme.textSecondary)),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Sign Out', style: TextStyle(color: AppTheme.sentimentNegative)),
+                  ),
+                ],
+              ),
+            );
+            
+            if (confirm == true) {
+              await SupabaseService.instance.signOut();
+              if (context.mounted) context.go(AppConstants.routeLogin);
+            }
           },
         ),
         const SizedBox(width: 8),
