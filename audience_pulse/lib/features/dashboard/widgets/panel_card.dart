@@ -10,6 +10,7 @@ import '../providers/dashboard_providers.dart';
 /// and collapsible expansion toggle.
 class PanelCard extends ConsumerStatefulWidget {
   final String title;
+  final String? tooltipMessage;
   final IconData icon;
   final String panelKey;
   final Widget child;
@@ -21,6 +22,7 @@ class PanelCard extends ConsumerStatefulWidget {
   const PanelCard({
     super.key,
     required this.title,
+    this.tooltipMessage,
     required this.icon,
     required this.panelKey,
     required this.child,
@@ -71,6 +73,13 @@ class _PanelCardState extends ConsumerState<PanelCard> {
                 Icon(widget.icon, size: 16, color: AppTheme.accent),
                 const SizedBox(width: 8),
                 Text(widget.title, style: Theme.of(context).textTheme.headlineSmall),
+                if (widget.tooltipMessage != null) ...[
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: widget.tooltipMessage!,
+                    child: const Icon(Icons.info_outline_rounded, size: 14, color: AppTheme.textMuted),
+                  ),
+                ],
                 const Spacer(),
                 if (lastUpdated != null && !_isCollapsed)
                   Text(

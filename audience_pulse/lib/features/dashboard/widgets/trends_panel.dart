@@ -17,6 +17,7 @@ class TrendsPanel extends ConsumerWidget {
 
     return PanelCard(
       title: 'Top Trends',
+      tooltipMessage: 'The fastest growing hashtags and keywords in the last hour.',
       icon: Icons.trending_up_rounded,
       panelKey: 'trends',
       expandedHeight: 380,

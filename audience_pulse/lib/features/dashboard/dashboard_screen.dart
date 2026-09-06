@@ -9,7 +9,7 @@ import '../dashboard/providers/dashboard_providers.dart';
 import 'widgets/sentiment_chart_panel.dart';
 import 'widgets/trends_panel.dart';
 import 'widgets/network_graph_panel.dart';
-import 'widgets/demographics_panel.dart';
+import 'widgets/crisis_matrix_panel.dart';
 import 'widgets/coordination_alert_panel.dart';
 
 /// Main dashboard — 4-panel responsive analytics view with left platform nav.
@@ -173,7 +173,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Expanded(child: NetworkGraphPanel()),
               const SizedBox(width: 16),
-              SizedBox(width: 340, child: DemographicsPanel()),
+              SizedBox(width: 340, child: const CrisisMatrixPanel()),
             ],
           ),
           const SizedBox(height: 16),
@@ -196,7 +196,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(height: 16),
         const NetworkGraphPanel(),
         const SizedBox(height: 16),
-        const DemographicsPanel(),
+        const CrisisMatrixPanel(),
         const SizedBox(height: 16),
         Container(key: _alertsKey, child: const CoordinationAlertPanel()),
       ],

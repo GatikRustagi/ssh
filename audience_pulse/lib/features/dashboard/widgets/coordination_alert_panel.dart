@@ -24,6 +24,7 @@ class CoordinationAlertPanel extends ConsumerWidget {
 
     return PanelCard(
       title: 'Coordination Risk Alerts',
+      tooltipMessage: 'Detects suspected bot swarms posting identical content.',
       icon: Icons.shield_outlined,
       panelKey: 'coordination',
       child: async.when(
