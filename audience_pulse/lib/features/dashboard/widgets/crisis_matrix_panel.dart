@@ -116,8 +116,7 @@ class _MatrixView extends StatelessWidget {
           touchTooltipData: ScatterTouchTooltipData(
             getTooltipColor: (_) => AppTheme.surfaceHigh,
             getTooltipItems: (touchedSpot) {
-              final idx = touchedSpot.spotIndex;
-              final p = points[idx];
+              final p = points.firstWhere((p) => p.virality.toDouble() == touchedSpot.x && p.sentimentScore == touchedSpot.y, orElse: () => points.first);
               return ScatterTooltipItem(
                 'User: ${p.author}\n',
                 textStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12),

@@ -167,7 +167,7 @@ class _SentimentChartState extends State<_SentimentChart> {
                   getTooltipColor: (_) => AppTheme.surfaceHigh,
                   getTooltipItems: (spots) => spots.map((spot) {
                     final label = activeLabels[spot.barIndex];
-                    final emoji = AppConstants.sentimentEmojis[label] ?? '';
+                    final emoji = AppConstants.sentimentEmoji[label] ?? '';
                     final color = AppConstants.sentimentColors[label] ?? AppTheme.textPrimary;
                     return LineTooltipItem(
                       '$emoji $label: ${spot.y.toInt()} posts',
