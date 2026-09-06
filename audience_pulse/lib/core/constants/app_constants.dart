@@ -34,13 +34,13 @@ class AppConstants {
 
   // ── Sentiment Label → Emoji ────────────────────────────────────────────────
   static const Map<String, String> sentimentEmoji = {
-    'positive'  : '😊',
-    'negative'  : '😠',
-    'neutral'   : '😐',
-    'sarcastic' : '😏',
-    'anxious'   : '😰',
-    'supportive': '🤝',
-    'against'   : '⚡',
+    'positive'  : '',
+    'negative'  : '',
+    'neutral'   : '',
+    'sarcastic' : '',
+    'anxious'   : '',
+    'supportive': '',
+    'against'   : '',
   };
 
   // ── Platform Display Names ────────────────────────────────────────────────

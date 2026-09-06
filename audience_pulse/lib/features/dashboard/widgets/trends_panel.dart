@@ -104,44 +104,33 @@ class _TrendTile extends StatelessWidget {
           // Growth rate indicator
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isRising ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                    size: 14,
-                    color: growthColor,
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    AppUtils.formatGrowthRate(trend.growthRate),
-                    style: TextStyle(
-                      color: growthColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              // Mini bar showing relative growth
               Container(
-                width: 60,
-                height: 4,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.border,
-                  borderRadius: BorderRadius.circular(2),
+                  color: growthColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: growthColor.withValues(alpha: 0.2)),
                 ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: (trend.growthRate.abs() / 500).clamp(0.05, 1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isRising ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                      size: 14,
                       color: growthColor,
-                      borderRadius: BorderRadius.circular(2),
                     ),
-                  ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${isRising ? '+' : ''}${trend.growthRate.toStringAsFixed(1)}% past 1 day',
+                      style: TextStyle(
+                        color: growthColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

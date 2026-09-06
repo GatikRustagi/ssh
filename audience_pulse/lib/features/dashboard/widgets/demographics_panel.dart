@@ -167,15 +167,19 @@ class _AgeBarChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 46,
-              getTitlesWidget: (val, meta) => SideTitleWidget(
-                meta: meta,
-                space: 4,
-                child: Text(
-                  AppUtils.compactNumber(val.toInt()),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
-                ),
-              ),
+              reservedSize: 40,
+              interval: maxVal > 100000 ? 100000 : (maxVal > 10000 ? 10000 : 5000),
+              getTitlesWidget: (val, meta) {
+                if (val == 0) return const SizedBox.shrink();
+                return SideTitleWidget(
+                  meta: meta,
+                  space: 4,
+                  child: Text(
+                    AppUtils.compactNumber(val.toInt()),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
+                  ),
+                );
+              },
             ),
           ),
           rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),

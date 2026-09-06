@@ -21,13 +21,13 @@ class AppTheme {
   static const Color textMuted    = Color(0xFF52525E);
 
   // ── Sentiment Colors ──────────────────────────────────────────────────────
-  static const Color sentimentPositive  = Color(0xFF22C55E); // green
-  static const Color sentimentNegative  = Color(0xFFEF4444); // red
-  static const Color sentimentNeutral   = Color(0xFF64748B); // slate
-  static const Color sentimentSarcastic = Color(0xFFF59E0B); // amber
-  static const Color sentimentAnxious   = Color(0xFFF97316); // orange
-  static const Color sentimentSupportive= Color(0xFF06B6D4); // cyan
-  static const Color sentimentAgainst   = Color(0xFFEC4899); // pink
+  static const Color sentimentPositive  = Color(0xFF4ADE80); // soft green
+  static const Color sentimentNegative  = Color(0xFFF87171); // soft red
+  static const Color sentimentNeutral   = Color(0xFF94A3B8); // soft slate
+  static const Color sentimentSarcastic = Color(0xFFFBBF24); // soft amber
+  static const Color sentimentAnxious   = Color(0xFFFB923C); // soft orange
+  static const Color sentimentSupportive= Color(0xFF38BDF8); // soft blue
+  static const Color sentimentAgainst   = Color(0xFFF472B6); // soft pink
 
   // ── Status Colors ─────────────────────────────────────────────────────────
   static const Color statusLive     = Color(0xFF22C55E);
