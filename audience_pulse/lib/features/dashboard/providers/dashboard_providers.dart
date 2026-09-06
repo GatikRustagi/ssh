@@ -13,6 +13,14 @@ import '../../../models/analysis_models.dart';
 /// Holds the currently selected platform ID filter (null = All).
 final platformFilterProvider = StateProvider<String?>((ref) => null);
 
+// ── Time Range Filter State ───────────────────────────────────────────────────
+/// Holds the currently selected time range filter.
+final timeRangeFilterProvider = StateProvider<String>((ref) => '1D');
+
+// ── Trend Sentiment Filter State ──────────────────────────────────────────────
+/// Holds the currently selected sentiment filter for Top Trends.
+final trendSentimentFilterProvider = StateProvider<String>((ref) => 'All');
+
 // ── Sentiment Timeline ────────────────────────────────────────────────────────
 
 /// Realtime stream of sentiment scores.
@@ -25,11 +33,24 @@ final sentimentStreamProvider = StreamProvider.autoDispose<List<SentimentScore>>
 /// One-shot fetch used for the initial chart render (includes joined posted_at).
 final sentimentTimelineProvider = FutureProvider.autoDispose<List<SentimentScore>>((ref) async {
   final platformId = ref.watch(platformFilterProvider);
+  final timeRange = ref.watch(timeRangeFilterProvider);
+  
+  Duration duration;
+  switch (timeRange) {
+    case '1H': duration = const Duration(hours: 1); break;
+    case '1D': duration = const Duration(days: 1); break;
+    case '1W': duration = const Duration(days: 7); break;
+    case '1M': duration = const Duration(days: 30); break;
+    case '1Y': duration = const Duration(days: 365); break;
+    case 'ALL': duration = const Duration(days: 3650); break;
+    default: duration = const Duration(days: 1); break;
+  }
+
   try {
     final res = await SupabaseService.instance.getSentimentTimelineOnce(
       platformId: platformId,
       range: DateTimeRange(
-        start: DateTime.now().subtract(const Duration(hours: 48)),
+        start: DateTime.now().subtract(duration),
         end: DateTime.now(),
       ),
     );

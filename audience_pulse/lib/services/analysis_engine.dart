@@ -43,6 +43,8 @@ class AnalysisEngine {
     'success': ('positive', 0.7), 'innovative': ('positive', 0.65),
     'breakthrough': ('positive', 0.8), 'proud': ('positive', 0.7),
     'thank': ('positive', 0.6), 'maturing': ('positive', 0.55),
+    'safecity': ('positive', 0.8), 'safe': ('positive', 0.8),
+    'city': ('positive', 0.6), 'needs': ('positive', 0.5),
     // negative
     'bad': ('negative', 0.6), 'terrible': ('negative', 0.9),
     'awful': ('negative', 0.85), 'hate': ('negative', 0.9),
@@ -52,6 +54,8 @@ class AnalysisEngine {
     'broken': ('negative', 0.65), 'useless': ('negative', 0.8),
     'garbage': ('negative', 0.85), 'scam': ('negative', 0.9),
     'manipulation': ('negative', 0.85), 'coordinated': ('negative', 0.5),
+    'deepfake': ('negative', 0.8), 'regulation': ('negative', 0.6),
+    'sebi': ('negative', 0.5), 'security': ('negative', 0.7),
     // anxious
     'scared': ('anxious', 0.8), 'worried': ('anxious', 0.75),
     'anxious': ('anxious', 0.9), 'fear': ('anxious', 0.8),

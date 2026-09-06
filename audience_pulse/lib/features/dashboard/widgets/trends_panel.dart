@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
 import '../../../models/trend.dart';
+import '../../../services/analysis_engine.dart';
 import '../providers/dashboard_providers.dart';
 import 'panel_card.dart';
 
@@ -14,18 +15,67 @@ class TrendsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(topTrendsProvider);
+    final filter = ref.watch(trendSentimentFilterProvider);
 
     return PanelCard(
-        backgroundColor: AppTheme.background,
-        title: 'Top Trends',
+      backgroundColor: AppTheme.background,
+      title: 'Top Trends',
       icon: Icons.trending_up_rounded,
       panelKey: 'trends',
       expandedHeight: 380,
-      child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e',
-            style: const TextStyle(color: Color(0xFFEF4444)))),
-        data: (trends) => _TrendsList(trends: trends),
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+              child: Container(
+                height: 28,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceHigh.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: filter,
+                    dropdownColor: AppTheme.surfaceHigh,
+                    icon: const Icon(Icons.arrow_drop_down, color: AppTheme.textSecondary, size: 16),
+                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 10, fontWeight: FontWeight.w600),
+                    isDense: true,
+                    items: const [
+                      DropdownMenuItem(value: 'All', child: Text('ALL TRENDS')),
+                      DropdownMenuItem(value: 'Positive', child: Text('POSITIVE')),
+                      DropdownMenuItem(value: 'Negative', child: Text('NEGATIVE')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        ref.read(trendSentimentFilterProvider.notifier).state = val;
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: async.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Color(0xFFEF4444)))),
+              data: (trends) {
+                final filtered = trends.where((t) {
+                  if (filter == 'All') return true;
+                  final result = AnalysisEngine.instance.classifySentiment(t.keywordOrTopic);
+                  if (filter == 'Positive') return result.label == 'positive' || result.label == 'supportive';
+                  if (filter == 'Negative') return result.label == 'negative' || result.label == 'anxious' || result.label == 'against';
+                  return true;
+                }).toList();
+                return _TrendsList(trends: filtered);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -56,7 +106,10 @@ class _TrendTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isRising = trend.growthRate > 0;
+    final sentiment = AnalysisEngine.instance.classifySentiment(trend.keywordOrTopic);
+    final isNegative = sentiment.label == 'negative' || sentiment.label == 'anxious' || sentiment.label == 'against';
+    final displayRate = trend.growthRate.abs();
+    final isRising = !isNegative;
     final growthColor = isRising ? AppTheme.sentimentPositive : AppTheme.sentimentNegative;
 
     // Rank badge color: top 3 get accent, rest get muted
@@ -123,7 +176,7 @@ class _TrendTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${isRising ? '+' : ''}${trend.growthRate.toStringAsFixed(1)}% past 1 day',
+                      '${isRising ? '+' : '-'}${displayRate.toStringAsFixed(1)}% past 1 day',
                       style: TextStyle(
                         color: growthColor,
                         fontSize: 11,

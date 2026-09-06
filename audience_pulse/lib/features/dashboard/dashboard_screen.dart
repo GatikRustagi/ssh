@@ -385,80 +385,26 @@ class _UserGreetingBanner extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.accentGlow.withValues(alpha: 0.25),
-            AppTheme.surfaceHigh,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppTheme.accent.withValues(alpha: 0.35),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.accentGlow.withValues(alpha: 0.15),
-            blurRadius: 24,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Row(
+      margin: const EdgeInsets.only(bottom: 24, top: 8),
+      alignment: Alignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.accent, Color(0xFF7C3AED)],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.accentGlow,
-                  blurRadius: 12,
-                  spreadRadius: 1,
-                ),
-              ],
+          Text(
+            'Hi, $name 👋',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
             ),
-            child: const Icon(Icons.waving_hand_rounded, color: Colors.white, size: 20),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hi, $name 👋',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: AppTheme.accent.withValues(alpha: 0.8),
-                        blurRadius: 16,
-                      ),
-                      Shadow(
-                        color: AppTheme.accentLight.withValues(alpha: 0.6),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Welcome back to Audie. Here is your live intelligence overview.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 4),
+          Text(
+            'Welcome back to Audie. Here is your live intelligence overview.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppTheme.textSecondary,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

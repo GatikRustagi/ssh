@@ -17,8 +17,8 @@ class SentimentChartPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(sentimentTimelineProvider);
-
     final explainer = ref.watch(sentimentExplainerProvider);
+    final selectedTimeRange = ref.watch(timeRangeFilterProvider);
 
     return PanelCard(
       backgroundColor: AppTheme.background,
@@ -37,6 +37,9 @@ class SentimentChartPanel extends ConsumerWidget {
               data: (scores) => _SentimentChart(scores: scores),
             ),
           ),
+          const SizedBox(height: 16),
+          // Time Filters
+          _buildTimeFilters(context, ref, selectedTimeRange),
           // ── Because chip ─────────────────────────────────────────────────
           explainer.when(
             loading: () => const SizedBox.shrink(),
@@ -47,6 +50,34 @@ class SentimentChartPanel extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTimeFilters(BuildContext context, WidgetRef ref, String selectedTimeRange) {
+    final ranges = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: ranges.map((range) {
+        final isSelected = selectedTimeRange == range;
+        return GestureDetector(
+          onTap: () => ref.read(timeRangeFilterProvider.notifier).state = range,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? AppTheme.accent.withValues(alpha: 0.15) : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              range,
+              style: TextStyle(
+                color: isSelected ? AppTheme.accentLight : AppTheme.textSecondary,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -61,7 +92,6 @@ class _SentimentChart extends StatefulWidget {
 
 class _SentimentChartState extends State<_SentimentChart> {
   String _selectedEmotion = 'All'; // 'All' or specific emotion
-  String _selectedTimeRange = '1D';
 
   // 5 main emotions
   static const _emotions = [
@@ -100,7 +130,8 @@ class _SentimentChartState extends State<_SentimentChart> {
         return FlSpot(e.key.toDouble(), count);
       }).toList();
 
-      if (points.every((p) => p.y == 0)) continue;
+      // We no longer skip if points are all zero, so that filtering by 'negative' when there is no data
+      // draws a flat line at 0 instead of showing 'No data to chart'.
 
       final color = AppConstants.sentimentColors[label] ?? AppTheme.textMuted;
       lines.add(LineChartBarData(
@@ -174,9 +205,6 @@ class _SentimentChartState extends State<_SentimentChart> {
                   ),
                 ),
         ),
-        const SizedBox(height: 16),
-        // Time Filters
-        _buildTimeFilters(context),
       ],
     );
   }
@@ -227,34 +255,6 @@ class _SentimentChartState extends State<_SentimentChart> {
                 color: isSelected ? color : AppTheme.textSecondary,
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildTimeFilters(BuildContext context) {
-    final ranges = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: ranges.map((range) {
-        final isSelected = _selectedTimeRange == range;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedTimeRange = range),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: isSelected ? AppTheme.accent.withValues(alpha: 0.15) : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              range,
-              style: TextStyle(
-                color: isSelected ? AppTheme.accentLight : AppTheme.textSecondary,
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ),

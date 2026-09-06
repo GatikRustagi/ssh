@@ -8,13 +8,13 @@ class AppTheme {
   AppTheme._();
 
   // ── Brand Colors ──────────────────────────────────────────────────────────
-  static const Color background   = Color(0xFF0F0F0F);
-  static const Color surface      = Color(0xFF101630);
-  static const Color surfaceHigh  = Color(0xFF112564);
-  static const Color border       = Color(0xFF1A2C5F);
-  static const Color accent       = Color(0xFF1B2CC1);
-  static const Color accentLight  = Color(0xFF7692FF);
-  static const Color accentGlow   = Color(0x331B2CC1);
+  static const Color background   = Color(0xFF000000); // Pure Black
+  static const Color surface      = Color(0xFF0F1115); // Deep cool black
+  static const Color surfaceHigh  = Color(0xFF1E293B); // Elegant dark slate
+  static const Color border       = Color(0xFF334155); // Slate border
+  static const Color accent       = Color(0xFF3B82F6); // Elegant basic blue
+  static const Color accentLight  = Color(0xFF60A5FA); // Lighter blue
+  static const Color accentGlow   = Color(0x333B82F6);
 
   static const Color textPrimary  = Color(0xFFF2F2F7);
   static const Color textSecondary = Color(0xFF8E8EA0);

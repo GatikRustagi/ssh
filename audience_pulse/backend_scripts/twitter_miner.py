@@ -140,7 +140,11 @@ def insert_mock_post(platform_id: str):
         "Just deployed our model for the hackathon. It scales perfectly. #tech",
         "This is a disaster waiting to happen. The system is flawed.",
         "Great coordination between the teams today! #SIH2026",
-        "I'm worried about the implications of this new AI trend... #scary"
+        "I'm worried about the implications of this new AI trend... #scary",
+        "I absolutely hate this product. It is a complete failure and useless. 😡",
+        "The recent update ruined everything. The UI is terrible and completely broken.",
+        "This is the worst experience I have ever had. Awful service and incompetent support.",
+        "I despise what this brand has become. Just a scam at this point. 🗑️"
     ]
     text = random.choice(mock_texts)
     
