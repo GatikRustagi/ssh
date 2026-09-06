@@ -97,9 +97,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Container(
             width: 32, height: 32,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.accent, Color(0xFF5B21B6)],
-              ),
+              color: AppTheme.accent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.bar_chart_rounded, color: Colors.white, size: 18),
@@ -222,7 +220,7 @@ class _LeftPlatformNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 188,
-      color: AppTheme.surface,
+      color: AppTheme.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

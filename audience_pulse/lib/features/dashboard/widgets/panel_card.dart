@@ -17,7 +17,7 @@ class PanelCard extends ConsumerStatefulWidget {
   final double? expandedHeight;
   final bool collapsible;
   final bool defaultCollapsed;
-
+  final Color? backgroundColor; // new optional background color
   const PanelCard({
     super.key,
     required this.title,
@@ -28,6 +28,7 @@ class PanelCard extends ConsumerStatefulWidget {
     this.expandedHeight,
     this.collapsible = true,
     this.defaultCollapsed = false,
+    this.backgroundColor,
   });
 
   @override
@@ -55,7 +56,7 @@ class _PanelCardState extends ConsumerState<PanelCard> {
       curve: Curves.easeInOut,
       height: height,
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: widget.backgroundColor ?? AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.border),
       ),

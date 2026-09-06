@@ -23,6 +23,7 @@ class CoordinationAlertPanel extends ConsumerWidget {
     final async = ref.watch(coordinationAlertsProvider);
 
     return PanelCard(
+      backgroundColor: AppTheme.background,
       title: 'Coordination Risk Alerts',
       icon: Icons.shield_outlined,
       panelKey: 'coordination',
