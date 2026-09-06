@@ -32,6 +32,7 @@ log = logging.getLogger(__name__)
 # ── Import individual pipeline steps ─────────────────────────────────────────
 import ingest_twitter
 import ingest_telegram
+import ingest_youtube
 import build_network
 import build_trends
 
@@ -48,6 +49,11 @@ def job_ingest_and_network():
         ingest_telegram.run()
     except Exception as exc:
         log.error("ingest_telegram failed: %s", exc, exc_info=True)
+
+    try:
+        ingest_youtube.run()
+    except Exception as exc:
+        log.error("ingest_youtube failed: %s", exc, exc_info=True)
 
     try:
         build_network.run()

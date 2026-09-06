@@ -9,18 +9,31 @@ import '../features/dashboard/dashboard_screen.dart';
 import '../features/dashboard/twitter_details_screen.dart';
 import '../features/ingestion_status/ingestion_status_screen.dart';
 import '../features/trends/trend_analysis_screen.dart';
+import '../features/splash/splash_screen.dart';
+
+bool _hasShownSplash = false;
 
 /// GoRouter with auth guard.
 /// Unauthenticated users are redirected to /login.
 /// Authenticated users visiting /login are redirected to /dashboard.
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: AppConstants.routeDashboard,
+    initialLocation: AppConstants.routeSplash,
     debugLogDiagnostics: false,
     redirect: (BuildContext context, GoRouterState state) {
       final user = SupabaseService.instance.currentUser;
       final isLoggedIn = user != null;
+      final isOnSplash = state.matchedLocation == AppConstants.routeSplash;
       final isOnLogin = state.matchedLocation == AppConstants.routeLogin;
+
+      // Force splash screen on first load
+      if (!_hasShownSplash && !isOnSplash) {
+        return AppConstants.routeSplash;
+      }
+      if (isOnSplash) {
+        _hasShownSplash = true;
+        return null; // Let them see it
+      }
 
       if (!isLoggedIn && !isOnLogin) {
         return AppConstants.routeLogin;
@@ -32,6 +45,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     refreshListenable: _AuthChangeNotifier(),
     routes: [
+      GoRoute(
+        path: AppConstants.routeSplash,
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: AppConstants.routeLogin,
         name: 'login',

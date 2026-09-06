@@ -8,9 +8,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# ── IDs of the two "live" platforms seeded in the database ──────────────────
+# ── IDs of the "live" platforms seeded in the database ─────────────────────
 PLATFORM_ID_TWITTER  = "11111111-0000-0000-0000-000000000001"
 PLATFORM_ID_TELEGRAM = "11111111-0000-0000-0000-000000000002"
+PLATFORM_ID_YOUTUBE  = "11111111-0000-0000-0000-000000000006"
 
 
 def load_env() -> None:
