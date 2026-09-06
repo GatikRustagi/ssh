@@ -1,198 +1,97 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
   <base href="$FLUTTER_BASE_HREF">
+
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Audie — AI-Powered Social Intelligence">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Audie">
+  <meta name="apple-mobile-web-app-title" content="audie">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-  <title>Audie — AI Social Intelligence</title>
+
+  <title>audie</title>
   <link rel="manifest" href="manifest.json">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background-color: #0F0F0F;
-      font-family: -apple-system, 'Inter', BlinkMacSystemFont, sans-serif;
-      overflow: hidden;
-    }
-
-    #loading-screen {
-      position: fixed;
-      inset: 0;
-      background-color: #0F0F0F;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
-
-    /* Dot grid background */
-    #loading-screen::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle, #1A2C5F 1px, transparent 1px);
-      background-size: 40px 40px;
-      opacity: 0.4;
-    }
-
-    /* Radial glow */
-    #loading-screen::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(27,44,193,0.08) 0%, transparent 70%);
-    }
-
-    .logo-container {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      animation: fadeSlideIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-      z-index: 1;
-    }
-
-    .logo-box {
-      width: 72px;
-      height: 72px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #1B2CC1, #5B21B6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 40px rgba(27,44,193,0.5), 0 0 80px rgba(27,44,193,0.2);
-      animation: pulse 1.5s ease-in-out infinite alternate;
-    }
-
-    .logo-box svg {
-      width: 36px;
-      height: 36px;
-      fill: white;
-    }
-
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .logo-name {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      background: linear-gradient(90deg, #F2F2F7, #7692FF);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .logo-tagline {
-      font-size: 13px;
-      font-weight: 400;
-      color: #8E8EA0;
-      letter-spacing: 0.3px;
-      opacity: 0;
-      animation: fadeIn 0.6s ease 0.5s forwards;
-    }
-
-    /* Progress bar at bottom */
-    .progress-bar-track {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: #1A2C5F;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #1B2CC1, #7692FF);
-      animation: progress 2s ease-in-out forwards;
-    }
-
-    .version-tag {
-      position: fixed;
-      bottom: 16px;
-      right: 20px;
-      font-size: 11px;
-      color: #52525E;
-      letter-spacing: 0.5px;
-      opacity: 0;
-      animation: fadeIn 0.6s ease 0.6s forwards;
-    }
-
-    @keyframes fadeSlideIn {
-      from { opacity: 0; transform: translateY(20px) scale(0.8); }
-      to   { opacity: 1; transform: translateY(0)    scale(1);   }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-
-    @keyframes pulse {
-      from { box-shadow: 0 0 30px rgba(27,44,193,0.4), 0 0 60px rgba(27,44,193,0.15); }
-      to   { box-shadow: 0 0 50px rgba(27,44,193,0.7), 0 0 100px rgba(27,44,193,0.3); }
-    }
-
-    @keyframes progress {
-      0%   { width: 0%;   }
-      60%  { width: 75%;  }
-      100% { width: 95%;  }
-    }
-
-    #loading-screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-  </style>
 </head>
 <body>
-  <!-- Branded loading screen shown BEFORE Flutter loads -->
-  <div id="loading-screen">
-    <div class="logo-container">
-      <div class="logo-box">
-        <!-- Bar chart icon — matches Flutter Icons.bar_chart_rounded exactly -->
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/>
-        </svg>
-      </div>
-      <div class="logo-text">
-        <span class="logo-name">Audie</span>
-        <span class="logo-tagline">AI-Powered Social Intelligence</span>
-      </div>
-    </div>
+  <style>
+    body {
+      background-color: #000000;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .splash-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo {
+      font-size: 52px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -2px;
+      animation: pulse 2s infinite;
+    }
+    .logo span {
+      color: #3B82F6;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.8; text-shadow: 0 0 10px rgba(59, 130, 246, 0); }
+      50% { opacity: 1; text-shadow: 0 0 24px rgba(59, 130, 246, 0.4); }
+      100% { opacity: 0.8; text-shadow: 0 0 10px rgba(59, 130, 246, 0); }
+    }
+  </style>
 
-    <div class="progress-bar-track">
-      <div class="progress-bar-fill"></div>
-    </div>
-
-    <span class="version-tag">v1.0 · BETA</span>
+  <div id="loading-splash" class="splash-container">
+    <div class="logo">Au<span>die</span></div>
   </div>
 
   <script>
-    // Fade out the HTML loading screen once Flutter signals it's ready
-    window.addEventListener('flutter-first-frame', function () {
-      var screen = document.getElementById('loading-screen');
-      if (screen) {
-        screen.classList.add('hidden');
-        setTimeout(function() { screen.remove(); }, 600);
+    window.addEventListener('flutter-first-frame', function() {
+      var splash = document.getElementById('loading-splash');
+      if (splash) {
+        // Keep the splash screen visible for an extra 1.5 seconds
+        setTimeout(() => {
+          splash.style.transition = 'opacity 0.6s ease';
+          splash.style.opacity = '0';
+          setTimeout(() => splash.remove(), 600);
+        }, 1500);
       }
     });
   </script>
+
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
+
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
