@@ -168,7 +168,7 @@ final crisisMatrixProvider = FutureProvider.autoDispose<List<CrisisPoint>>((ref)
   
   final points = <CrisisPoint>[];
   for (final post in posts) {
-    final result = await AnalysisEngine.instance.classifySentiment(post.contentText);
+    final result = AnalysisEngine.instance.classifySentiment(post.contentText);
     double y = result.score;
     if (['negative', 'anxious', 'against', 'sarcastic'].contains(result.label)) {
       y = -y;
