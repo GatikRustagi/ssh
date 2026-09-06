@@ -206,6 +206,26 @@ final lastUpdatedProvider =
   (ref) => LastUpdatedNotifier(),
 );
 
+// ── Saved Investigations ──────────────────────────────────────────────────────
+class SavedAlertsNotifier extends StateNotifier<List<CoordinationRiskResult>> {
+  SavedAlertsNotifier() : super([]);
+
+  void saveAlert(CoordinationRiskResult alert) {
+    if (!state.any((a) => a.narrativeLabel == alert.narrativeLabel)) {
+      state = [...state, alert];
+    }
+  }
+
+  void removeAlert(String narrativeLabel) {
+    state = state.where((a) => a.narrativeLabel != narrativeLabel).toList();
+  }
+}
+
+final savedAlertsProvider =
+    StateNotifierProvider<SavedAlertsNotifier, List<CoordinationRiskResult>>(
+  (ref) => SavedAlertsNotifier(),
+);
+
 // ── Fallback Mock Generators ──────────────────────────────────────────────────
 
 List<Trend> _fallbackTrends() {

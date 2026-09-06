@@ -76,15 +76,15 @@ class _AlertList extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _AlertTile extends StatefulWidget {
+class _AlertTile extends ConsumerStatefulWidget {
   final CoordinationRiskResult alert;
   const _AlertTile({required this.alert});
 
   @override
-  State<_AlertTile> createState() => _AlertTileState();
+  ConsumerState<_AlertTile> createState() => _AlertTileState();
 }
 
-class _AlertTileState extends State<_AlertTile> {
+class _AlertTileState extends ConsumerState<_AlertTile> {
   bool _expanded = false;
 
   @override
@@ -173,6 +173,26 @@ class _AlertTileState extends State<_AlertTile> {
                     ),
                   ),
                   const SizedBox(width: 6),
+
+                  // Save Button
+                  IconButton(
+                    icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+                    color: AppTheme.textSecondary,
+                    tooltip: 'Save investigation',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      ref.read(savedAlertsProvider.notifier).saveAlert(a);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Saved "${a.narrativeLabel}" to investigations.'),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: AppTheme.surfaceHigh,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
 
                   // Expand chevron
                   AnimatedRotation(

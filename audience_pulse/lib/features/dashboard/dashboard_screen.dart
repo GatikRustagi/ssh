@@ -13,6 +13,7 @@ import 'widgets/network_graph_panel.dart';
 import 'widgets/demographics_panel.dart';
 import 'widgets/coordination_alert_panel.dart';
 import 'widgets/smart_summary_panel.dart';
+import 'widgets/saved_investigations_panel.dart';
 
 /// Main dashboard — 4-panel responsive analytics view with left platform nav.
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -176,7 +177,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              SizedBox(width: 340, child: const DemographicsPanel()),
+              const SizedBox(
+                width: 340,
+                child: Column(
+                  children: [
+                    DemographicsPanel(),
+                    SizedBox(height: 16),
+                    SavedInvestigationsPanel(),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -198,6 +208,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const DemographicsPanel(),
         const SizedBox(height: 16),
         Container(key: _alertsKey, child: const CoordinationAlertPanel()),
+        const SizedBox(height: 16),
+        const SavedInvestigationsPanel(),
       ],
     );
   }
