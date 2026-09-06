@@ -209,8 +209,57 @@ def scan_for_bots():
                 console.print("[dim cyan]ℹ️ This toxic content was already logged.[/dim cyan]\n")
     # =========================================================================
 
+    # =========================================================================
+    # NEW SUPERPOWER: Idea 3 - Spoiler & Leak Patrol (For Movie Studios)
+    # =========================================================================
+    TARGET_MOVIE = "pushpa"
+    spoiler_words = ["leak", "spoiler", "ending", "camrip", "download", "dies"]
+    
+    for post in posts:
+        msg = post.get("content_text", "").lower()
+        author = post.get("author_id")
+        post_id = post.get("id")
+        
+        # Check if the post mentions the movie AND a spoiler word
+        if TARGET_MOVIE in msg:
+            found_spoilers = [word for word in spoiler_words if word in msg]
+            
+            if found_spoilers:
+                bot_detected = True
+                spoiler_list = ", ".join(found_spoilers)
+                
+                spam_message = f"[bold yellow]👉 Threat Level:[/bold yellow] [bold red]CRITICAL LEAK[/bold red]\n"
+                spam_message += f"[bold yellow]👉 Target Movie:[/bold yellow] [white]{TARGET_MOVIE.title()}[/white]\n"
+                spam_message += f"[bold yellow]👉 Danger Words:[/bold yellow] [white]{spoiler_list}[/white]\n"
+                spam_message += f"[bold yellow]👉 Message:[/bold yellow] [dim]{msg[:60]}...[/dim]"
+                
+                console.print(Panel(spam_message, title="🚨 ALERT! Movie Spoiler / Leak Detected! 🚨", border_style="cyan", expand=False))
+
+                narrative_label = f"Spoiler/Leak: {TARGET_MOVIE.title()} ({found_spoilers[0]})"
+                alert_data = {
+                    "narrative_label": narrative_label,
+                    "risk_level": "high",
+                    "risk_score": 0.95,
+                    "evidence": [
+                        f"Message contained movie title '{TARGET_MOVIE}' and danger keywords: {spoiler_list}",
+                        f"Sample text: {msg[:100]}"
+                    ],
+                    "post_ids": [post_id],
+                    "window_start": window_start,
+                    "window_end": window_end,
+                    "resolved": False
+                }
+
+                existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
+                if not existing.data:
+                    supabase.table("coordination_alerts").insert(alert_data).execute()
+                    console.print("[bold green]✅ Leak Patrol Alert logged to Supabase![/bold green]\n")
+                else:
+                    console.print("[dim cyan]ℹ️ This leak was already logged.[/dim cyan]\n")
+    # =========================================================================
+
     if not bot_detected:
-        console.print("[bold green]✅ Playground is safe! No attacks, swarms, or toxic words detected.[/bold green]")
+        console.print("[bold green]✅ Playground is safe! No attacks, swarms, toxic words, or leaks detected.[/bold green]")
 
 if __name__ == "__main__":
     console.print(Panel("[bold cyan]👮‍♂️ Bot Police is on duty! Press Ctrl+C to stop.[/bold cyan]", expand=False))

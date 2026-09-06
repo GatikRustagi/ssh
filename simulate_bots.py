@@ -58,4 +58,14 @@ supabase.table("posts").insert({
     "raw_engagement_count": 0
 }).execute()
 
+# 5. Inject a Movie Spoiler/Leak (Idea 3)
+print("🎥 Injecting a movie leak (Spoiler Patrol test)...")
+supabase.table("posts").insert({
+    "platform_id": authors[1]["platform_id"],
+    "author_id": authors[1]["id"],
+    "content_text": "OMG I can't believe he dies at the end of Pushpa! Download the camrip leak here before it gets deleted!",
+    "posted_at": "2026-09-06T00:03:00Z",
+    "raw_engagement_count": 0
+}).execute()
+
 print("✅ Bot posts injected! Now run bot_police.py to see it catch them!")
