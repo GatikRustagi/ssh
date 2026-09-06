@@ -74,9 +74,23 @@ class _SentimentChartState extends State<_SentimentChart> {
       return const Center(child: Text('No sentiment data yet.'));
     }
 
-    // Filter by emotion if not 'All'
+    final now = DateTime.now();
+    Duration timeLimit;
+    switch (_selectedTimeRange) {
+      case '1H': timeLimit = const Duration(hours: 1); break;
+      case '1D': timeLimit = const Duration(days: 1); break;
+      case '1W': timeLimit = const Duration(days: 7); break;
+      case '1M': timeLimit = const Duration(days: 30); break;
+      case '1Y': timeLimit = const Duration(days: 365); break;
+      case 'ALL': timeLimit = const Duration(days: 3650); break;
+      default: timeLimit = const Duration(days: 1); break;
+    }
+
+    // Filter by time and emotion
     final filteredScores = widget.scores.where((s) {
       if (_selectedEmotion != 'All' && s.sentimentLabel != _selectedEmotion) return false;
+      final dt = s.postedAt ?? s.scoredAt;
+      if (now.difference(dt) > timeLimit) return false;
       return true;
     }).toList();
 
