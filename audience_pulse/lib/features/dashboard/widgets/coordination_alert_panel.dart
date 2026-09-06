@@ -23,7 +23,7 @@ class CoordinationAlertPanel extends ConsumerWidget {
     final async = ref.watch(coordinationAlertsProvider);
 
     return PanelCard(
-      title: 'Coordination Risk Alerts',
+      title: 'Community Warnings',
       icon: Icons.shield_outlined,
       panelKey: 'coordination',
       child: async.when(
@@ -54,7 +54,7 @@ class _AlertList extends StatelessWidget {
               color: AppTheme.sentimentPositive, size: 18),
           const SizedBox(width: 8),
           Text(
-            'No coordination risk detected in the current window.',
+            'No unusual activity detected recently.',
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
@@ -221,8 +221,8 @@ class _AlertTileState extends State<_AlertTile> {
                       ),
                     ),
                     child: Text(
-                      'Rule-based inference only — not a determination of intent. '
-                      'Each signal is independently verifiable from the post data.',
+                      'Our system scans for bot-like behavior, spam, and artificial trends '
+                      'to help you see authentic community sentiment.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppTheme.accentLight,
                           ),

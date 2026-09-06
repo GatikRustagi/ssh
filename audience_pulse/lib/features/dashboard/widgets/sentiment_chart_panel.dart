@@ -58,12 +58,12 @@ class _SentimentChart extends StatefulWidget {
 }
 
 class _SentimentChartState extends State<_SentimentChart> {
-  String? _touchedLabel;
+  String _selectedEmotion = 'All'; // 'All' or specific emotion
+  String _selectedTimeRange = '1D';
 
-  // All possible sentiment labels
-  static const _labels = [
-    'positive', 'negative', 'neutral', 'sarcastic',
-    'anxious', 'supportive', 'against',
+  // 5 main emotions
+  static const _emotions = [
+    'positive', 'negative', 'neutral', 'supportive', 'anxious'
   ];
 
   @override
@@ -72,100 +72,97 @@ class _SentimentChartState extends State<_SentimentChart> {
       return const Center(child: Text('No sentiment data yet.'));
     }
 
-    // Group scores by hour bucket, then by label
-    final grouped = _groupByHourAndLabel(widget.scores);
+    // Filter by emotion if not 'All'
+    final filteredScores = widget.scores.where((s) {
+      if (_selectedEmotion != 'All' && s.sentimentLabel != _selectedEmotion) return false;
+      return true;
+    }).toList();
+
+    // Group scores
+    final grouped = _groupByHourAndLabel(filteredScores);
     if (grouped.isEmpty) return const Center(child: Text('No data to chart.'));
 
     final sortedHours = grouped.keys.toList()..sort();
     final bool isSinglePoint = sortedHours.length == 1;
     if (isSinglePoint) {
-      sortedHours.add('now'); // Dummy X-axis label so we have 2 points to draw a line
+      sortedHours.add('now'); // Dummy X-axis label
     }
 
-    // Build one line per sentiment label
+    final labelsToDraw = _selectedEmotion == 'All' ? _emotions : [_selectedEmotion];
+
     final lines = <LineChartBarData>[];
-    for (final label in _labels) {
+    for (final label in labelsToDraw) {
       final points = sortedHours.asMap().entries.map((e) {
-        // If it's the dummy second point, copy the value from the first point
         final bucketKey = (isSinglePoint && e.key == 1) ? sortedHours[0] : e.value;
         final count = (grouped[bucketKey]?[label] ?? 0).toDouble();
         return FlSpot(e.key.toDouble(), count);
       }).toList();
 
-      if (points.every((p) => p.y == 0)) continue; // skip empty lines
+      if (points.every((p) => p.y == 0)) continue;
 
       final color = AppConstants.sentimentColors[label] ?? AppTheme.textMuted;
       lines.add(LineChartBarData(
         spots: points,
         color: color,
-        isCurved: !isSinglePoint,
-        curveSmoothness: 0.3,
-        barWidth: _touchedLabel == label ? 3 : 2,
+        isCurved: true,
+        curveSmoothness: 0.2,
+        barWidth: 2,
         isStrokeCapRound: true,
-        dotData: FlDotData(show: true),
+        dotData: const FlDotData(show: false), // Hide dots by default like CoinDCX
         belowBarData: BarAreaData(
-          show: _touchedLabel == label,
-          color: color.withValues(alpha: 0.12),
+          show: _selectedEmotion != 'All', // Only show fill if single emotion
+          color: color.withValues(alpha: 0.1),
         ),
       ));
     }
 
     return Column(
       children: [
-        // Legend
-        _buildLegend(context),
-        const SizedBox(height: 12),
+        // Emotion Legend/Filter
+        _buildEmotionFilters(context),
+        const SizedBox(height: 16),
         // Chart
         Expanded(
           child: LineChart(
             LineChartData(
               backgroundColor: Colors.transparent,
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: false,
-                getDrawingHorizontalLine: (_) => FlLine(
-                  color: AppTheme.border,
-                  strokeWidth: 1,
-                ),
-              ),
+              gridData: const FlGridData(show: false), // Remove grid lines for cleaner look
               borderData: FlBorderData(show: false),
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 28,
-                    getTitlesWidget: (val, _) => Text(
-                      val.toInt().toString(),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 32,
-                    interval: 6,
-                    getTitlesWidget: (val, _) {
-                      final idx = val.toInt();
-                      if (idx < 0 || idx >= sortedHours.length) return const SizedBox();
-                      return Text(
-                        sortedHours[idx],
-                        style: Theme.of(context).textTheme.bodySmall,
-                      );
-                    },
-                  ),
-                ),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles:   const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              ),
+              titlesData: const FlTitlesData(show: false), // Hide axis labels; rely on hover tooltip
               lineBarsData: lines,
               lineTouchData: LineTouchData(
+                handleBuiltInTouches: true,
+                getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
+                  return spotIndexes.map((spotIndex) {
+                    return TouchedSpotIndicatorData(
+                      FlLine(color: AppTheme.border, strokeWidth: 1, dashArray: [4, 4]),
+                      FlDotData(
+                        getDotPainter: (spot, percent, barData, index) {
+                          return FlDotCirclePainter(
+                            radius: 4,
+                            color: barData.color ?? AppTheme.accent,
+                            strokeWidth: 2,
+                            strokeColor: AppTheme.surfaceHigh,
+                          );
+                        },
+                      ),
+                    );
+                  }).toList();
+                },
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppTheme.surfaceHigh,
+                  tooltipRoundedRadius: 8,
                   getTooltipItems: (spots) => spots.map((spot) {
+                    final time = sortedHours[spot.x.toInt()];
                     return LineTooltipItem(
-                      '${spot.y.toInt()} posts',
-                      const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+                      '${spot.y.toInt()} posts\n',
+                      const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+                      children: [
+                        TextSpan(
+                          text: time,
+                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.normal),
+                        ),
+                      ],
                     );
                   }).toList(),
                 ),
@@ -173,16 +170,24 @@ class _SentimentChartState extends State<_SentimentChart> {
             ),
           ),
         ),
+        const SizedBox(height: 16),
+        // Time Filters
+        _buildTimeFilters(context),
       ],
     );
   }
 
-  /// Groups scores into hour-label buckets: { "Sep4 14h": { "positive": 3 } }
   Map<String, Map<String, int>> _groupByHourAndLabel(List<SentimentScore> scores) {
     final result = <String, Map<String, int>>{};
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
     for (final score in scores) {
       final dt = score.postedAt ?? score.scoredAt;
-      final bucket = '${dt.month}/${dt.day} ${dt.hour}h';
+      final amPm = dt.hour < 12 ? 'AM' : 'PM';
+      final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+      final monthStr = months[dt.month - 1];
+      
+      final bucket = '$monthStr ${dt.day}, $h $amPm';
       result.putIfAbsent(bucket, () => {});
       result[bucket]![score.sentimentLabel] =
           (result[bucket]![score.sentimentLabel] ?? 0) + 1;
@@ -190,37 +195,64 @@ class _SentimentChartState extends State<_SentimentChart> {
     return result;
   }
 
-  Widget _buildLegend(BuildContext context) {
+  Widget _buildEmotionFilters(BuildContext context) {
+    final List<String> options = ['All', ..._emotions];
     return Wrap(
-      spacing: 12,
-      runSpacing: 6,
-      children: _labels.map((label) {
-        final color = AppConstants.sentimentColors[label] ?? AppTheme.textMuted;
-        final emoji = AppConstants.sentimentEmoji[label] ?? '';
+      spacing: 8,
+      runSpacing: 8,
+      children: options.map((label) {
+        final isSelected = _selectedEmotion == label;
+        final color = label == 'All' 
+            ? AppTheme.textPrimary 
+            : (AppConstants.sentimentColors[label] ?? AppTheme.textMuted);
+            
         return GestureDetector(
-          onTap: () => setState(() {
-            _touchedLabel = _touchedLabel == label ? null : label;
-          }),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 10, height: 10,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+          onTap: () => setState(() => _selectedEmotion = label),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected ? color.withValues(alpha: 0.5) : AppTheme.border,
               ),
-              const SizedBox(width: 4),
-              Text(
-                '$emoji $label',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: _touchedLabel == null || _touchedLabel == label
-                      ? AppTheme.textSecondary
-                      : AppTheme.textMuted,
-                ),
+            ),
+            child: Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                color: isSelected ? color : AppTheme.textSecondary,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
-            ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTimeFilters(BuildContext context) {
+    final ranges = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: ranges.map((range) {
+        final isSelected = _selectedTimeRange == range;
+        return GestureDetector(
+          onTap: () => setState(() => _selectedTimeRange = range),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? AppTheme.accent.withValues(alpha: 0.15) : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              range,
+              style: TextStyle(
+                color: isSelected ? AppTheme.accentLight : AppTheme.textSecondary,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ),
         );
       }).toList(),

@@ -11,6 +11,7 @@ import 'widgets/trends_panel.dart';
 import 'widgets/network_graph_panel.dart';
 import 'widgets/demographics_panel.dart';
 import 'widgets/coordination_alert_panel.dart';
+import 'widgets/smart_summary_panel.dart';
 
 /// Main dashboard — 4-panel responsive analytics view with left platform nav.
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -121,15 +122,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
       actions: [
-        // Ingestion status button
-        TextButton.icon(
-          key: const Key('ingestion_status_btn'),
-          onPressed: () => context.go(AppConstants.routeIngestion),
-          icon: const Icon(Icons.cable_outlined, size: 16),
-          label: const Text('Pipeline'),
-          style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
-        ),
-        const SizedBox(width: 8),
 
         // Live coordination-risk alert badge
         _AlertBadge(onTap: _scrollToAlerts),
@@ -159,6 +151,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const _UserGreetingBanner(),
+          const SmartSummaryPanel(),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -171,15 +164,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: NetworkGraphPanel()),
+              Expanded(
+                child: Column(
+                  children: [
+                    const NetworkGraphPanel(),
+                    const SizedBox(height: 16),
+                    Container(
+                      key: _alertsKey,
+                      child: const CoordinationAlertPanel(),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(width: 16),
               SizedBox(width: 340, child: DemographicsPanel()),
             ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            key: _alertsKey,
-            child: const CoordinationAlertPanel(),
           ),
         ],
       ),
@@ -190,6 +189,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return ListView(
       children: [
         const _UserGreetingBanner(),
+        const SmartSummaryPanel(),
         const SentimentChartPanel(),
         const SizedBox(height: 16),
         const TrendsPanel(),
@@ -453,7 +453,7 @@ class _UserGreetingBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Welcome back to AudiencePulse. Here is your live intelligence overview.',
+                  'Welcome back to Audie. Here is your live intelligence overview.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
