@@ -23,6 +23,7 @@ class CoordinationAlertPanel extends ConsumerWidget {
     final async = ref.watch(coordinationAlertsProvider);
 
     return PanelCard(
+      backgroundColor: AppTheme.background,
       title: 'Coordination Risk Alerts',
       tooltipMessage: 'Detects suspected bot swarms posting identical content.',
       icon: Icons.shield_outlined,

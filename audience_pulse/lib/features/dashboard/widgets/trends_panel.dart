@@ -16,8 +16,8 @@ class TrendsPanel extends ConsumerWidget {
     final async = ref.watch(topTrendsProvider);
 
     return PanelCard(
-      title: 'Top Trends',
-      tooltipMessage: 'The fastest growing hashtags and keywords in the last hour.',
+        backgroundColor: AppTheme.background,
+        title: 'Top Trends',
       icon: Icons.trending_up_rounded,
       panelKey: 'trends',
       expandedHeight: 380,

@@ -25,6 +25,7 @@ class NetworkGraphPanel extends ConsumerWidget {
       tooltipMessage: 'Shows which accounts are frequently interacting with each other.',
       icon: Icons.hub_outlined,
       panelKey: 'network',
+      backgroundColor: AppTheme.background,
       collapsible: false,
       child: async.when(
         loading: () => const SizedBox(

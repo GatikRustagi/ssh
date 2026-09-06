@@ -21,6 +21,7 @@ class SentimentChartPanel extends ConsumerWidget {
     final explainer = ref.watch(sentimentExplainerProvider);
 
     return PanelCard(
+      backgroundColor: AppTheme.background,
       title: 'Sentiment Timeline',
       tooltipMessage: 'Tracks how positive or negative the conversation is over time.',
       icon: Icons.show_chart_rounded,
