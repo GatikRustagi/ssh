@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 # ── Tuning knobs ─────────────────────────────────────────────────────────────
 TOP_N_TRENDS     = 10    # how many trends to write per run
 MIN_MENTIONS     = 2     # ignore keywords mentioned fewer than this many times
-WINDOW_HOURS     = 1     # size of each time window in hours
+WINDOW_HOURS     = 48    # expanded to 48 hours for hackathon testing
 
 # Words to ignore when extracting plain keywords
 STOP_WORDS = {

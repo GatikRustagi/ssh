@@ -122,6 +122,53 @@ final coordinationAlertsProvider =
   return AnalysisEngine.instance.computeCoordinationRisk(posts);
 });
 
+// ── Crisis Matrix ─────────────────────────────────────────────────────────────
+
+class CrisisPoint {
+  final String author;
+  final String content;
+  final int virality;
+  final double sentimentScore; // -1.0 to 1.0
+  
+  CrisisPoint({
+    required this.author,
+    required this.content,
+    required this.virality,
+    required this.sentimentScore,
+  });
+}
+
+final crisisMatrixProvider = FutureProvider.autoDispose<List<CrisisPoint>>((ref) async {
+  final platformId = ref.watch(platformFilterProvider);
+  final posts = await SupabaseService.instance.getTopViralPosts(
+    platformId: platformId,
+    limit: 50,
+  );
+  
+  final points = <CrisisPoint>[];
+  for (final post in posts) {
+    final result = await AnalysisEngine.instance.classifySentiment(post.contentText);
+    double y = result.score;
+    if (['negative', 'anxious', 'against', 'sarcastic'].contains(result.label)) {
+      y = -y;
+    } else if (result.label == 'neutral') {
+      y = 0.0;
+    }
+    
+    // Slight jitter to avoid overlapping dots perfectly
+    final jitter = (DateTime.now().millisecondsSinceEpoch % 100) / 1000.0;
+    y += jitter * (y < 0 ? 1 : -1);
+    
+    points.add(CrisisPoint(
+      author: post.authorId, // Ideally we map this to handle, but author_id works for now
+      content: post.contentText,
+      virality: post.rawEngagementCount,
+      sentimentScore: y.clamp(-1.0, 1.0),
+    ));
+  }
+  return points;
+});
+
 // ── Last Updated ──────────────────────────────────────────────────────────────
 
 /// Simple notifier that tracks the last-refresh timestamp per panel key.

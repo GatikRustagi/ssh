@@ -9,7 +9,7 @@ import '../dashboard/providers/dashboard_providers.dart';
 import 'widgets/sentiment_chart_panel.dart';
 import 'widgets/trends_panel.dart';
 import 'widgets/network_graph_panel.dart';
-import 'widgets/demographics_panel.dart';
+import 'widgets/crisis_matrix_panel.dart';
 import 'widgets/coordination_alert_panel.dart';
 
 /// Main dashboard — 4-panel responsive analytics view with left platform nav.
@@ -103,7 +103,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: const Icon(Icons.bar_chart_rounded, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
-          Text('AudiencePulse', style: Theme.of(context).textTheme.headlineMedium),
+          Text('Audie', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(width: 4),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -128,6 +128,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
         ),
         const SizedBox(width: 8),
+
         // Live coordination-risk alert badge
         _AlertBadge(onTap: _scrollToAlerts),
         const SizedBox(width: 8),
@@ -170,7 +171,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Expanded(child: NetworkGraphPanel()),
               const SizedBox(width: 16),
-              SizedBox(width: 340, child: DemographicsPanel()),
+              SizedBox(width: 340, child: const CrisisMatrixPanel()),
             ],
           ),
           const SizedBox(height: 16),
@@ -193,7 +194,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(height: 16),
         const NetworkGraphPanel(),
         const SizedBox(height: 16),
-        const DemographicsPanel(),
+        const CrisisMatrixPanel(),
         const SizedBox(height: 16),
         Container(key: _alertsKey, child: const CoordinationAlertPanel()),
       ],

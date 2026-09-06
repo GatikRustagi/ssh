@@ -6,7 +6,9 @@ import '../core/constants/app_constants.dart';
 import '../services/supabase_service.dart';
 import '../features/auth/login_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/dashboard/twitter_details_screen.dart';
 import '../features/ingestion_status/ingestion_status_screen.dart';
+import '../features/trends/trend_analysis_screen.dart';
 
 /// GoRouter with auth guard.
 /// Unauthenticated users are redirected to /login.
@@ -44,6 +46,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppConstants.routeIngestion,
         name: 'ingestion',
         builder: (context, state) => const IngestionStatusScreen(),
+      ),
+      GoRoute(
+        path: AppConstants.routeTwitterDetails,
+        name: 'twitter-details',
+        builder: (context, state) => const TwitterDetailsScreen(),
+      ),
+      GoRoute(
+        path: AppConstants.routeTrends,
+        name: 'trends',
+        builder: (context, state) => const TrendAnalysisScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -26,9 +26,13 @@ if sys.platform == "win32":
 
 from supabase import create_client, Client
 
+import os
+from dotenv import load_dotenv
+
 # 1. Connect to Supabase
-SUPABASE_URL = "https://yyrxgmkeyxfohururkfi.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5cnhnbWtleXhmb2h1cnVya2ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2MjY1NDEsImV4cCI6MjEwNDIwMjU0MX0.2gKiuhHCK7U7_yB4TeNRa0wmxTmN7hDXZ3V2fEE0G0o"
+load_dotenv("audience_pulse/backend_scripts/.env")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -68,7 +72,7 @@ def scan_for_bots():
         text_to_post_ids[msg].append(post.get("id"))
         text_to_samples[msg] = post
 
-    # C. Check if any text was repeated by multiple different authors
+    # C. Check if any text was repeated by multiple different authors (Duplicate Text)
     bot_detected = False
     now_utc = datetime.now(timezone.utc)
     window_start = (now_utc - timedelta(minutes=TIME_WINDOW_MINUTES)).isoformat()
@@ -83,12 +87,11 @@ def scan_for_bots():
             alarm_message = f"[bold yellow]👉 Message:[/bold yellow] [white]\"{msg[:60]}...\"[/white]\n"
             alarm_message += f"[bold yellow]👉 Shared by:[/bold yellow] [bold red]{count} different accounts![/bold red]"
             
-            console.print(Panel(alarm_message, title="🚨 ALERT! Found coordinated attack! 🚨", border_style="red", expand=False))
+            console.print(Panel(alarm_message, title="🚨 ALERT! Found Coordinated Text Attack! 🚨", border_style="red", expand=False))
 
             sample_post = text_to_samples[msg]
             matching_post_ids = text_to_post_ids[msg]
 
-            # D. Insert alarm into Supabase matching its table schema
             narrative_label = f"Coordinated Bot Burst ({count} Accounts)"
             alert_data = {
                 "narrative_label": narrative_label,
@@ -104,7 +107,6 @@ def scan_for_bots():
                 "resolved": False
             }
 
-            # Avoid duplicate alerts for the exact same narrative in the same run
             existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
             if not existing.data:
                 supabase.table("coordination_alerts").insert(alert_data).execute()
@@ -112,8 +114,156 @@ def scan_for_bots():
             else:
                 console.print("[dim cyan]ℹ️ Alert for this attack was already logged in Supabase.[/dim cyan]\n")
 
+    # =========================================================================
+    # NEW SUPERPOWER: Idea 3 - The "Hashtag Swarm" Detector
+    # =========================================================================
+    import re
+    hashtag_to_authors = defaultdict(set)
+    hashtag_to_post_ids = defaultdict(list)
+    
+    # 1. Look inside every post for hashtags
+    for post in posts:
+        msg = post.get("content_text", "").lower()
+        author = post.get("author_id")
+        post_id = post.get("id")
+        
+        # Pull out any word that starts with # (like #BuyMyFakeCoin)
+        hashtags_found = set(re.findall(r'#\w+', msg))
+        
+        for hashtag in hashtags_found:
+            hashtag_to_authors[hashtag].add(author)
+            hashtag_to_post_ids[hashtag].append(post_id)
+
+    # 2. Check if a hashtag is being used by too many different people!
+    for hashtag, authors in hashtag_to_authors.items():
+        count = len(authors)
+        if count >= BOT_THRESHOLD:
+            bot_detected = True
+            
+            swarm_message = f"[bold yellow]👉 Hashtag:[/bold yellow] [white]{hashtag}[/white]\n"
+            swarm_message += f"[bold yellow]👉 Used by:[/bold yellow] [bold red]{count} different accounts![/bold red]"
+            
+            console.print(Panel(swarm_message, title="🚨 ALERT! Hashtag Swarm Detected! 🚨", border_style="magenta", expand=False))
+
+            narrative_label = f"Hashtag Swarm: {hashtag} ({count} Accounts)"
+            alert_data = {
+                "narrative_label": narrative_label,
+                "risk_level": "high" if count >= 4 else "medium",
+                "risk_score": round(min(0.99, 0.4 + (count * 0.1)), 2),
+                "evidence": [
+                    f"Hashtag {hashtag} was suddenly used by {count} unique accounts.",
+                    f"Time window: {TIME_WINDOW_MINUTES} minutes."
+                ],
+                "post_ids": hashtag_to_post_ids[hashtag],
+                "window_start": window_start,
+                "window_end": window_end,
+                "resolved": False
+            }
+
+            existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
+            if not existing.data:
+                supabase.table("coordination_alerts").insert(alert_data).execute()
+                console.print("[bold green]✅ Hashtag Swarm Alert logged to Supabase![/bold green]\n")
+            else:
+                console.print("[dim cyan]ℹ️ This hashtag swarm was already logged.[/dim cyan]\n")
+    # =========================================================================
+
+    # =========================================================================
+    # NEW SUPERPOWER: Idea 4 - The Clean-Up Crew (Hate Speech / Spam Filter)
+    # =========================================================================
+    bad_words = ["free money", "scam", "click here", "stupid", "idiot", "hate"]
+    
+    for post in posts:
+        msg = post.get("content_text", "").lower()
+        author = post.get("author_id")
+        post_id = post.get("id")
+        
+        found_bad_words = [word for word in bad_words if word in msg]
+        
+        if found_bad_words:
+            bot_detected = True
+            bad_word_list = ", ".join(found_bad_words)
+            
+            spam_message = f"[bold yellow]👉 Toxic Word(s):[/bold yellow] [white]{bad_word_list}[/white]\n"
+            spam_message += f"[bold yellow]👉 Author:[/bold yellow] [bold red]{author}[/bold red]\n"
+            spam_message += f"[bold yellow]👉 Message:[/bold yellow] [dim]{msg[:60]}...[/dim]"
+            
+            console.print(Panel(spam_message, title="🚨 ALERT! Toxic/Spam Content Detected! 🚨", border_style="dark_orange", expand=False))
+
+            narrative_label = f"Toxic/Spam Content: '{found_bad_words[0]}'"
+            alert_data = {
+                "narrative_label": narrative_label,
+                "risk_level": "medium",
+                "risk_score": 0.85,
+                "evidence": [
+                    f"Message contained toxic/spam keywords: {bad_word_list}",
+                    f"Sample text: {msg[:100]}"
+                ],
+                "post_ids": [post_id],
+                "window_start": window_start,
+                "window_end": window_end,
+                "resolved": False
+            }
+
+            existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
+            if not existing.data:
+                supabase.table("coordination_alerts").insert(alert_data).execute()
+                console.print("[bold green]✅ Toxic Content Alert logged to Supabase![/bold green]\n")
+            else:
+                console.print("[dim cyan]ℹ️ This toxic content was already logged.[/dim cyan]\n")
+    # =========================================================================
+
+    # =========================================================================
+    # NEW SUPERPOWER: Idea 3 - Spoiler & Leak Patrol (For Movie Studios)
+    # =========================================================================
+    TARGET_MOVIE = "pushpa"
+    spoiler_words = ["leak", "spoiler", "ending", "camrip", "download", "dies"]
+    
+    for post in posts:
+        msg = post.get("content_text", "").lower()
+        author = post.get("author_id")
+        post_id = post.get("id")
+        
+        # Check if the post mentions the movie AND a spoiler word
+        if TARGET_MOVIE in msg:
+            found_spoilers = [word for word in spoiler_words if word in msg]
+            
+            if found_spoilers:
+                bot_detected = True
+                spoiler_list = ", ".join(found_spoilers)
+                
+                spam_message = f"[bold yellow]👉 Threat Level:[/bold yellow] [bold red]CRITICAL LEAK[/bold red]\n"
+                spam_message += f"[bold yellow]👉 Target Movie:[/bold yellow] [white]{TARGET_MOVIE.title()}[/white]\n"
+                spam_message += f"[bold yellow]👉 Danger Words:[/bold yellow] [white]{spoiler_list}[/white]\n"
+                spam_message += f"[bold yellow]👉 Message:[/bold yellow] [dim]{msg[:60]}...[/dim]"
+                
+                console.print(Panel(spam_message, title="🚨 ALERT! Movie Spoiler / Leak Detected! 🚨", border_style="cyan", expand=False))
+
+                narrative_label = f"Spoiler/Leak: {TARGET_MOVIE.title()} ({found_spoilers[0]})"
+                alert_data = {
+                    "narrative_label": narrative_label,
+                    "risk_level": "high",
+                    "risk_score": 0.95,
+                    "evidence": [
+                        f"Message contained movie title '{TARGET_MOVIE}' and danger keywords: {spoiler_list}",
+                        f"Sample text: {msg[:100]}"
+                    ],
+                    "post_ids": [post_id],
+                    "window_start": window_start,
+                    "window_end": window_end,
+                    "resolved": False
+                }
+
+                existing = supabase.table("coordination_alerts").select("id").eq("narrative_label", narrative_label).execute()
+                if not existing.data:
+                    supabase.table("coordination_alerts").insert(alert_data).execute()
+                    console.print("[bold green]✅ Leak Patrol Alert logged to Supabase![/bold green]\n")
+                else:
+                    console.print("[dim cyan]ℹ️ This leak was already logged.[/dim cyan]\n")
+    # =========================================================================
+
     if not bot_detected:
-        console.print("[bold green]✅ Playground is safe! No copycat bot swarms detected.[/bold green]")
+        console.print("[bold green]✅ Playground is safe! No attacks, swarms, toxic words, or leaks detected.[/bold green]")
 
 if __name__ == "__main__":
     console.print(Panel("[bold cyan]👮‍♂️ Bot Police is on duty! Press Ctrl+C to stop.[/bold cyan]", expand=False))

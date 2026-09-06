@@ -23,6 +23,7 @@ class SentimentChartPanel extends ConsumerWidget {
     return PanelCard(
       backgroundColor: AppTheme.background,
       title: 'Sentiment Timeline',
+      tooltipMessage: 'Tracks how positive or negative the conversation is over time.',
       icon: Icons.show_chart_rounded,
       panelKey: 'sentiment',
       expandedHeight: 380,
@@ -85,6 +86,7 @@ class _SentimentChartState extends State<_SentimentChart> {
 
     // Build one line per sentiment label
     final lines = <LineChartBarData>[];
+    final activeLabels = <String>[];
     for (final label in _labels) {
       final points = sortedHours.asMap().entries.map((e) {
         // If it's the dummy second point, copy the value from the first point
@@ -95,6 +97,7 @@ class _SentimentChartState extends State<_SentimentChart> {
 
       if (points.every((p) => p.y == 0)) continue; // skip empty lines
 
+      activeLabels.add(label);
       final color = AppConstants.sentimentColors[label] ?? AppTheme.textMuted;
       lines.add(LineChartBarData(
         spots: points,
@@ -164,9 +167,12 @@ class _SentimentChartState extends State<_SentimentChart> {
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppTheme.surfaceHigh,
                   getTooltipItems: (spots) => spots.map((spot) {
+                    final label = activeLabels[spot.barIndex];
+                    final emoji = AppConstants.sentimentEmoji[label] ?? '';
+                    final color = AppConstants.sentimentColors[label] ?? AppTheme.textPrimary;
                     return LineTooltipItem(
-                      '${spot.y.toInt()} posts',
-                      const TextStyle(color: AppTheme.textPrimary, fontSize: 12),
+                      '$emoji $label: ${spot.y.toInt()} posts',
+                      TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
                     );
                   }).toList(),
                 ),

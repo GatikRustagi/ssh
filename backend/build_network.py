@@ -40,7 +40,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── How far back to scan posts on each run ───────────────────────────────────
-LOOK_BACK_MINUTES = 60
+LOOK_BACK_MINUTES = 2880
 
 
 def run():
