@@ -86,16 +86,15 @@ class _SentimentChartState extends State<_SentimentChart> {
       default: timeLimit = const Duration(days: 1); break;
     }
 
-    // Filter by time and emotion
-    final filteredScores = widget.scores.where((s) {
-      if (_selectedEmotion != 'All' && s.sentimentLabel != _selectedEmotion) return false;
+    // Filter ONLY by time (not by emotion, to preserve the timeline axis)
+    final timeFilteredScores = widget.scores.where((s) {
       final dt = s.postedAt ?? s.scoredAt;
       if (now.difference(dt) > timeLimit) return false;
       return true;
     }).toList();
 
-    // Group scores
-    final grouped = _groupByHourAndLabel(filteredScores);
+    // Group the time-filtered scores
+    final grouped = _groupByHourAndLabel(timeFilteredScores);
     if (grouped.isEmpty) return const Center(child: Text('No data to chart.'));
 
     final sortedHours = grouped.keys.toList()..sort();
