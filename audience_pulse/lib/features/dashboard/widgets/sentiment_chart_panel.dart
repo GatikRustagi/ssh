@@ -113,8 +113,6 @@ class _SentimentChartState extends State<_SentimentChart> {
         return FlSpot(e.key.toDouble(), count);
       }).toList();
 
-      if (points.every((p) => p.y == 0)) continue;
-
       final color = AppConstants.sentimentColors[label] ?? AppTheme.textMuted;
       lines.add(LineChartBarData(
         spots: points,
