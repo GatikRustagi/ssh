@@ -28,12 +28,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     'All Platforms': null,
     'X (Twitter)': '11111111-0000-0000-0000-000000000001',
     'Telegram': '11111111-0000-0000-0000-000000000002',
+    'YouTube': '11111111-0000-0000-0000-000000000006',
   };
 
   static const Map<String, IconData> _platformIcons = {
     'All Platforms': Icons.language_rounded,
     'X (Twitter)': Icons.close_rounded, // 𝕏 shape via icon
     'Telegram': Icons.send_rounded,
+    'YouTube': Icons.play_arrow_rounded,
   };
 
   String _selectedPlatformLabel = 'All Platforms';
