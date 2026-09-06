@@ -173,6 +173,25 @@ class SupabaseService {
     return (data as List).map((e) => Post.fromJson(e)).toList();
   }
 
+  /// Returns the [limit] most viral posts (sorted by raw_engagement_count descending).
+  /// Used for the Crisis Matrix.
+  Future<List<Post>> getTopViralPosts({
+    String? platformId,
+    int limit = 50,
+  }) async {
+    var query = _client.from(AppConstants.tablePosts).select();
+
+    if (platformId != null) {
+      query = query.eq('platform_id', platformId);
+    }
+
+    final data = await query
+        .order('raw_engagement_count', ascending: false)
+        .limit(limit);
+
+    return (data as List).map((e) => Post.fromJson(e)).toList();
+  }
+
   /// Returns the [limit] most recent posts for the coordination-risk engine.
   /// Wider window (default 200) so the engine can detect bursts across clusters.
   /// Used by [coordinationAlertsProvider].

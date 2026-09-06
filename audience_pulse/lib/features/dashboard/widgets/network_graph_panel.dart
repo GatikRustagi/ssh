@@ -22,8 +22,10 @@ class NetworkGraphPanel extends ConsumerWidget {
 
     return PanelCard(
       title: 'Influence Network',
+      tooltipMessage: 'Shows which accounts are frequently interacting with each other.',
       icon: Icons.hub_outlined,
       panelKey: 'network',
+      backgroundColor: AppTheme.background,
       collapsible: false,
       child: async.when(
         loading: () => const SizedBox(
@@ -53,7 +55,7 @@ class _NetworkGraphView extends StatelessWidget {
     if (graph.nodes.isEmpty) {
       return const SizedBox(
         height: 300,
-        child: Center(child: Text('No network data available.')),
+        child: Center(child: Text('Gathering network interactions...')),
       );
     }
 

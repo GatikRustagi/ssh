@@ -9,7 +9,7 @@ import '../dashboard/providers/dashboard_providers.dart';
 import 'widgets/sentiment_chart_panel.dart';
 import 'widgets/trends_panel.dart';
 import 'widgets/network_graph_panel.dart';
-import 'widgets/demographics_panel.dart';
+import 'widgets/crisis_matrix_panel.dart';
 import 'widgets/coordination_alert_panel.dart';
 import 'widgets/smart_summary_panel.dart';
 
@@ -98,9 +98,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Container(
             width: 32, height: 32,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.accent, Color(0xFF5B21B6)],
-              ),
+              color: AppTheme.accent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.bar_chart_rounded, color: Colors.white, size: 18),
@@ -177,7 +175,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              SizedBox(width: 340, child: DemographicsPanel()),
+              SizedBox(width: 340, child: const CrisisMatrixPanel()),
             ],
           ),
         ],
@@ -196,7 +194,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(height: 16),
         const NetworkGraphPanel(),
         const SizedBox(height: 16),
-        const DemographicsPanel(),
+        const CrisisMatrixPanel(),
         const SizedBox(height: 16),
         Container(key: _alertsKey, child: const CoordinationAlertPanel()),
       ],
@@ -223,7 +221,7 @@ class _LeftPlatformNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 188,
-      color: AppTheme.surface,
+      color: AppTheme.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

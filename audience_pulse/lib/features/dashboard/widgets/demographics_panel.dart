@@ -18,14 +18,22 @@ class DemographicsPanel extends ConsumerWidget {
     final async = ref.watch(demographicsProvider);
 
     return PanelCard(
+      backgroundColor: AppTheme.background,
       title: 'Audience Demographics',
       icon: Icons.people_outline_rounded,
       panelKey: 'demographics',
       expandedHeight: 440,
       child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-            child: Text('Error: $e', style: const TextStyle(color: Color(0xFFEF4444)))),
+        loading: () => const SizedBox(
+          height: 300,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        error: (e, _) => SizedBox(
+          height: 300,
+          child: Center(
+            child: Text('Error: $e', style: const TextStyle(color: Color(0xFFEF4444))),
+          ),
+        ),
         data: (summaries) => _DemographicsView(summaries: summaries),
       ),
     );

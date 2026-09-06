@@ -8,13 +8,13 @@ class AppTheme {
   AppTheme._();
 
   // ── Brand Colors ──────────────────────────────────────────────────────────
-  static const Color background   = Color(0xFF0C0C0F);  // near-black
-  static const Color surface      = Color(0xFF141418);  // card surface
-  static const Color surfaceHigh  = Color(0xFF1C1C22);  // elevated surfaces
-  static const Color border       = Color(0xFF2A2A35);  // subtle borders
-  static const Color accent       = Color(0xFF7C3AED);  // violet primary
-  static const Color accentLight  = Color(0xFF9D6FEF);  // hover / lighter
-  static const Color accentGlow   = Color(0x337C3AED);  // glow / overlay
+  static const Color background   = Color(0xFF0F0F0F);
+  static const Color surface      = Color(0xFF101630);
+  static const Color surfaceHigh  = Color(0xFF112564);
+  static const Color border       = Color(0xFF1A2C5F);
+  static const Color accent       = Color(0xFF1B2CC1);
+  static const Color accentLight  = Color(0xFF7692FF);
+  static const Color accentGlow   = Color(0x331B2CC1);
 
   static const Color textPrimary  = Color(0xFFF2F2F7);
   static const Color textSecondary = Color(0xFF8E8EA0);
