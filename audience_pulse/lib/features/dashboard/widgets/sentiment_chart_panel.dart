@@ -102,7 +102,6 @@ class _SentimentChartState extends State<_SentimentChart> {
 
       if (points.every((p) => p.y == 0)) continue;
 
-      activeLabels.add(label);
       final color = AppConstants.sentimentColors[label] ?? AppTheme.textMuted;
       lines.add(LineChartBarData(
         spots: points,
@@ -126,52 +125,54 @@ class _SentimentChartState extends State<_SentimentChart> {
         const SizedBox(height: 16),
         // Chart
         Expanded(
-          child: LineChart(
-            LineChartData(
-              backgroundColor: Colors.transparent,
-              gridData: const FlGridData(show: false), // Remove grid lines for cleaner look
-              borderData: FlBorderData(show: false),
-              titlesData: const FlTitlesData(show: false), // Hide axis labels; rely on hover tooltip
-              lineBarsData: lines,
-              lineTouchData: LineTouchData(
-                handleBuiltInTouches: true,
-                getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
-                  return spotIndexes.map((spotIndex) {
-                    return TouchedSpotIndicatorData(
-                      FlLine(color: AppTheme.border, strokeWidth: 1, dashArray: [4, 4]),
-                      FlDotData(
-                        getDotPainter: (spot, percent, barData, index) {
-                          return FlDotCirclePainter(
-                            radius: 4,
-                            color: barData.color ?? AppTheme.accent,
-                            strokeWidth: 2,
-                            strokeColor: AppTheme.surfaceHigh,
+          child: lines.isEmpty 
+              ? const Center(child: Text('No data for this emotion in the current view.', style: TextStyle(color: AppTheme.textMuted)))
+              : LineChart(
+                  LineChartData(
+                    backgroundColor: Colors.transparent,
+                    gridData: const FlGridData(show: false), // Remove grid lines for cleaner look
+                    borderData: FlBorderData(show: false),
+                    titlesData: const FlTitlesData(show: false), // Hide axis labels; rely on hover tooltip
+                    lineBarsData: lines,
+                    lineTouchData: LineTouchData(
+                      handleBuiltInTouches: true,
+                      getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
+                        return spotIndexes.map((spotIndex) {
+                          return TouchedSpotIndicatorData(
+                            FlLine(color: AppTheme.border, strokeWidth: 1, dashArray: [4, 4]),
+                            FlDotData(
+                              getDotPainter: (spot, percent, barData, index) {
+                                return FlDotCirclePainter(
+                                  radius: 4,
+                                  color: barData.color ?? AppTheme.accent,
+                                  strokeWidth: 2,
+                                  strokeColor: AppTheme.surfaceHigh,
+                                );
+                              },
+                            ),
                           );
-                        },
+                        }).toList();
+                      },
+                      touchTooltipData: LineTouchTooltipData(
+                        getTooltipColor: (_) => AppTheme.surfaceHigh,
+                        tooltipRoundedRadius: 8,
+                        getTooltipItems: (spots) => spots.map((spot) {
+                          final time = sortedHours[spot.x.toInt()];
+                          return LineTooltipItem(
+                            '${spot.y.toInt()} posts\n',
+                            const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+                            children: [
+                              TextSpan(
+                                text: time,
+                                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.normal),
+                              ),
+                            ],
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList();
-                },
-                touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (_) => AppTheme.surfaceHigh,
-                  tooltipRoundedRadius: 8,
-                  getTooltipItems: (spots) => spots.map((spot) {
-                    final time = sortedHours[spot.x.toInt()];
-                    return LineTooltipItem(
-                      '${spot.y.toInt()} posts\n',
-                      const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
-                      children: [
-                        TextSpan(
-                          text: time,
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.normal),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
         ),
         const SizedBox(height: 16),
         // Time Filters
