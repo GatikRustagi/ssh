@@ -266,6 +266,12 @@ def scan_for_bots():
         console.print("[bold green]✅ Playground is safe! No attacks, swarms, toxic words, or leaks detected.[/bold green]")
 
 if __name__ == "__main__":
+    # Splash Screen
+    console.clear()
+    console.print(Panel("\n\n[bold cyan]AUDIE[/bold cyan]\n\n", border_style="cyan", expand=False))
+    time.sleep(2)
+    console.clear()
+
     console.print(Panel("[bold cyan]👮‍♂️ Bot Police is on duty! Press Ctrl+C to stop.[/bold cyan]", expand=False))
     while True:
         try:
